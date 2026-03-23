@@ -102,6 +102,10 @@ curl -X POST http://localhost:4000/api/beneficiary/register \
   -d '{"name":"LUTH","email":"hospital@example.com","password":"password123","phone":"+2348012345678"}'
 ```
 
+## Postman Collection
+
+Import `backend/postman/ImpactBridge.postman_collection.json` into Postman to test quickly.
+
 Login
 
 ```bash

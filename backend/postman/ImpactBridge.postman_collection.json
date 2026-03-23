@@ -1,0 +1,133 @@
+{
+  "info": {
+    "_postman_id": "impactbridge-backend",
+    "name": "ImpactBridge Backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000" },
+    { "key": "token", "value": "" },
+    { "key": "adminSecret", "value": "" },
+    { "key": "campaignId", "value": "" },
+    { "key": "donationId", "value": "" },
+    { "key": "txRef", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": { "method": "GET", "url": "{{baseUrl}}/health" }
+    },
+    {
+      "name": "Register Beneficiary",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/api/beneficiary/register",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"LUTH\",\"email\":\"hospital@example.com\",\"password\":\"password123\",\"phone\":\"+2348012345678\"}"
+        }
+      }
+    },
+    {
+      "name": "Register Donor",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/api/donor/register",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"Ayo\",\"email\":\"ayo@example.com\",\"password\":\"pass123\"}"
+        }
+      }
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/api/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"hospital@example.com\",\"password\":\"password123\"}"
+        }
+      }
+    },
+    {
+      "name": "Create Campaign",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": "{{baseUrl}}/api/campaign/create",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\":\"Kidney Surgery Fund\",\"description\":\"Help save Emeka’s life\",\"targetAmount\":500000,\"deadline\":\"2026-04-30\"}"
+        }
+      }
+    },
+    {
+      "name": "List Campaigns",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/campaign" }
+    },
+    {
+      "name": "Campaign Details",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/campaign/{{campaignId}}" }
+    },
+    {
+      "name": "Campaign Progress",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/campaign/{{campaignId}}/progress" }
+    },
+    {
+      "name": "Initiate Donation",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": "{{baseUrl}}/api/donation/initiate",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"campaignId\":\"{{campaignId}}\",\"amount\":5000,\"redirectUrl\":\"https://your-frontend.com/payment/callback\"}"
+        }
+      }
+    },
+    {
+      "name": "Process Donation",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": "{{baseUrl}}/api/donation/process",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"campaignId\":\"{{campaignId}}\",\"amount\":5000,\"donorName\":\"Ayo\",\"transactionReference\":\"{{txRef}}\"}"
+        }
+      }
+    },
+    {
+      "name": "Donation Receipt",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/donation/receipt/{{donationId}}" }
+    },
+    {
+      "name": "Create Admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-admin-secret", "value": "{{adminSecret}}" }
+        ],
+        "url": "{{baseUrl}}/api/admin/create",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"Admin\",\"email\":\"admin@impactbridge.io\",\"password\":\"admin123\"}"
+        }
+      }
+    }
+  ]
+}
