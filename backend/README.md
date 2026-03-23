@@ -27,6 +27,10 @@ npm run dev
 
 Health check: `GET /health`
 
+Temporary callback page for sandbox testing:
+
+- `GET /payment/callback`
+
 ## Seed Demo Data
 
 This resets collections and inserts demo users, a campaign, and donations:
