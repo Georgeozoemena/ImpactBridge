@@ -67,6 +67,7 @@ Donations
 
 Admin
 
+- `POST /api/admin/create` (requires `x-admin-secret`)
 - `GET /api/users`
 - `GET /api/campaigns/all`
 
@@ -134,6 +135,15 @@ curl -X POST http://localhost:4000/api/donation/initiate \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <JWT_TOKEN>" \
   -d '{"campaignId":"<CAMPAIGN_ID>","amount":5000,"redirectUrl":"https://your-frontend.com/payment/callback"}'
+```
+
+Create admin
+
+```bash
+curl -X POST http://localhost:4000/api/admin/create \
+  -H "Content-Type: application/json" \
+  -H "x-admin-secret: <ADMIN_SETUP_SECRET>" \
+  -d '{"name":"Admin","email":"admin@impactbridge.io","password":"admin123"}'
 ```
 
 ## Demo Flow

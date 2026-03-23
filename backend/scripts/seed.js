@@ -33,6 +33,13 @@ const run = async () => {
     role: "donor"
   });
 
+  await User.create({
+    name: "ImpactBridge Admin",
+    email: "admin@impactbridge.io",
+    password: "admin123",
+    role: "admin"
+  });
+
   const campaign = await Campaign.create({
     title: "Kidney Surgery Fund",
     description: "Help save Emeka’s life with a kidney transplant",
