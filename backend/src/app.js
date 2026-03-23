@@ -34,7 +34,20 @@ app.use((req, res) => {
 
 app.use((err, _req, res, _next) => {
   console.error(err);
-  res.status(500).json({ success: false, message: "Server error" });
+
+  if (err.name === "ValidationError") {
+    return res.status(400).json({ success: false, message: err.message });
+  }
+
+  if (err.name === "CastError") {
+    return res.status(400).json({ success: false, message: "Invalid ID format" });
+  }
+
+  if (err.code === 11000) {
+    return res.status(409).json({ success: false, message: "Duplicate key error" });
+  }
+
+  return res.status(500).json({ success: false, message: "Server error" });
 });
 
 module.exports = app;
