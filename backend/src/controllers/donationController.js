@@ -100,9 +100,10 @@ const processDonation = async (req, res) => {
 const initiateDonation = async (req, res) => {
   const { campaignId, amount, redirectUrl } = req.body;
   const donorName = req.body.donorName || req.user.name;
+  const donorEmail = req.body.donorEmail || req.user.email;
   const numericAmount = Number(amount);
-  if (!campaignId || !numericAmount || !donorName) {
-    return res.fail("campaignId, amount, and donorName are required", 400);
+  if (!campaignId || !numericAmount || !donorName || !donorEmail) {
+    return res.fail("campaignId, amount, donorName, and donorEmail are required", 400);
   }
   if (numericAmount <= 0) {
     return res.fail("amount must be greater than 0", 400);
@@ -130,7 +131,10 @@ const initiateDonation = async (req, res) => {
     amountKobo,
     transactionReference,
     customerId: req.user._id.toString(),
-    redirectUrl
+    customerEmail: donorEmail,
+    customerName: donorName,
+    redirectUrl,
+    payItemName: campaign.title
   });
 
   return res.ok({

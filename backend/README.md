@@ -88,13 +88,13 @@ Admin
 - `GET /api/users`
 - `GET /api/campaigns/all`
 
-## Interswitch Verification
+## Interswitch Verification (Quickteller Web Checkout)
 
 The donation endpoint expects a `transactionReference` unless `INTERSWITCH_STUB=true`.
-Verification uses the WebPAY `gettransaction.json` endpoint with SHA-512 hash:
+Verification uses the Web Checkout requery endpoint:
 
 ```
-hash = SHA512(productId + transactionReference + macKey)
+GET /collections/api/v1/gettransaction.json?merchantcode=...&transactionreference=...&amount=...
 ```
 
 ## Socket.IO Events
@@ -155,7 +155,7 @@ Initiate donation (get payment form fields)
 curl -X POST http://localhost:4000/api/donation/initiate \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <JWT_TOKEN>" \
-  -d '{"campaignId":"<CAMPAIGN_ID>","amount":5000,"redirectUrl":"https://your-frontend.com/payment/callback"}'
+  -d '{"campaignId":"<CAMPAIGN_ID>","amount":5000,"redirectUrl":"https://your-frontend.com/payment/callback","donorEmail":"ayo@example.com"}'
 ```
 
 Create admin
