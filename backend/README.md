@@ -41,6 +41,17 @@ npm run seed
 npm test
 ```
 
+## Deployment
+
+Render:
+
+- A `render.yaml` file is included at repo root with `rootDir: backend`.
+- Set env vars in the Render dashboard (see `.env.example`).
+
+Heroku:
+
+- A `backend/Procfile` is included.
+
 ## Environment Variables
 
 See `.env.example` for all variables. Key notes:
