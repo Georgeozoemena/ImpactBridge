@@ -36,6 +36,29 @@ app.get("/health", (_req, res) => {
   res.ok({ status: "ok", name: "ImpactBridge API" });
 });
 
+app.get("/payment/callback", (req, res) => {
+  const data = JSON.stringify(req.query, null, 2);
+  res.setHeader("Content-Type", "text/html");
+  res.send(
+    `<!doctype html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>ImpactBridge Payment Callback</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 40px; color: #222; }
+          pre { background: #f6f6f6; padding: 16px; border-radius: 8px; }
+        </style>
+      </head>
+      <body>
+        <h2>Payment Callback Received</h2>
+        <p>Copy the transaction reference below and use it to verify the donation.</p>
+        <pre>${data}</pre>
+      </body>
+    </html>`
+  );
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/beneficiary", beneficiaryRoutes);
 app.use("/api/donor", donorRoutes);
