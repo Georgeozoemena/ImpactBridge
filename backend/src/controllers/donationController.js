@@ -4,11 +4,17 @@ const Campaign = require("../models/Campaign");
 const { verifyPayment } = require("../services/interswitch");
 
 const processDonation = async (req, res) => {
-  const { campaignId, amount, paymentMethod } = req.body;
+  const { campaignId, amount, paymentMethod, transactionReference } = req.body;
   const donorName = req.body.donorName || req.user.name;
   const numericAmount = Number(amount);
   if (!campaignId || !numericAmount || !donorName) {
     return res.status(400).json({ success: false, message: "campaignId, amount, and donorName are required" });
+  }
+  if (!transactionReference && process.env.INTERSWITCH_STUB !== "true") {
+    return res.status(400).json({
+      success: false,
+      message: "transactionReference is required for Interswitch verification"
+    });
   }
 
   const campaign = await Campaign.findById(campaignId);
@@ -23,10 +29,14 @@ const processDonation = async (req, res) => {
     amount: numericAmount,
     paymentMethod: paymentMethod || "interswitch",
     status: "pending",
-    transactionRef: "pending"
+    transactionRef: transactionReference || "pending"
   });
 
-  const verification = await verifyPayment({ campaignId, amount: numericAmount, donorName });
+  const amountKobo = Math.round(numericAmount * 100);
+  const verification = await verifyPayment({
+    transactionReference: transactionReference || pendingDonation._id.toString(),
+    amountKobo
+  });
   if (!verification.verified) {
     pendingDonation.status = "failed";
     await pendingDonation.save();
@@ -50,7 +60,8 @@ const processDonation = async (req, res) => {
       campaignId: pendingDonation.campaignId,
       amount: pendingDonation.amount,
       donorName: pendingDonation.donorName,
-      date: pendingDonation.createdAt
+      date: pendingDonation.createdAt,
+      responseCode: verification.responseCode
     },
     updatedCampaign: {
       raisedAmount: campaign.raisedAmount,
