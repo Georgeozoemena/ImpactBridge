@@ -10,6 +10,9 @@ const processDonation = async (req, res) => {
   if (!campaignId || !numericAmount || !donorName) {
     return res.status(400).json({ success: false, message: "campaignId, amount, and donorName are required" });
   }
+  if (numericAmount <= 0) {
+    return res.status(400).json({ success: false, message: "amount must be greater than 0" });
+  }
   if (!transactionReference && process.env.INTERSWITCH_STUB !== "true") {
     return res.status(400).json({
       success: false,

@@ -3,14 +3,21 @@ const Donation = require("../models/Donation");
 
 const createCampaign = async (req, res) => {
   const { title, description, targetAmount, deadline, imageUrl } = req.body;
-  if (!title || !description || !targetAmount) {
+  const numericTarget = Number(targetAmount);
+  if (!title || !description || !numericTarget) {
     return res.status(400).json({ success: false, message: "Title, description, and targetAmount are required" });
+  }
+  if (numericTarget <= 0) {
+    return res.status(400).json({ success: false, message: "targetAmount must be greater than 0" });
+  }
+  if (deadline && Number.isNaN(Date.parse(deadline))) {
+    return res.status(400).json({ success: false, message: "Invalid deadline date" });
   }
 
   const campaign = await Campaign.create({
     title,
     description,
-    targetAmount,
+    targetAmount: numericTarget,
     deadline,
     imageUrl,
     createdBy: req.user._id
@@ -100,6 +107,10 @@ const updateStatus = async (req, res) => {
   const { status } = req.body;
   if (!status) {
     return res.status(400).json({ success: false, message: "Status is required" });
+  }
+  const allowed = ["active", "inactive", "completed"];
+  if (!allowed.includes(status)) {
+    return res.status(400).json({ success: false, message: "Invalid status value" });
   }
 
   const campaign = await Campaign.findByIdAndUpdate(
