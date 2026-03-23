@@ -35,6 +35,12 @@ This resets collections and inserts demo users, a campaign, and donations:
 npm run seed
 ```
 
+## Tests
+
+```bash
+npm test
+```
+
 ## Environment Variables
 
 See `.env.example` for all variables. Key notes:
