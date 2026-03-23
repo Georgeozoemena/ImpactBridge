@@ -11,22 +11,21 @@ const signToken = (user) => {
 const login = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res.status(400).json({ success: false, message: "Email and password are required" });
+    return res.fail("Email and password are required", 400);
   }
 
   const user = await User.findOne({ email: email.toLowerCase() });
   if (!user) {
-    return res.status(401).json({ success: false, message: "Invalid credentials" });
+    return res.fail("Invalid credentials", 401);
   }
 
   const isMatch = await user.comparePassword(password);
   if (!isMatch) {
-    return res.status(401).json({ success: false, message: "Invalid credentials" });
+    return res.fail("Invalid credentials", 401);
   }
 
   const token = signToken(user);
-  return res.json({
-    success: true,
+  return res.ok({
     user: { _id: user._id, name: user.name, role: user.role, email: user.email },
     token
   });

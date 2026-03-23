@@ -9,21 +9,18 @@ const processDonation = async (req, res) => {
   const donorName = req.body.donorName || req.user.name;
   const numericAmount = Number(amount);
   if (!campaignId || !numericAmount || !donorName) {
-    return res.status(400).json({ success: false, message: "campaignId, amount, and donorName are required" });
+    return res.fail("campaignId, amount, and donorName are required", 400);
   }
   if (numericAmount <= 0) {
-    return res.status(400).json({ success: false, message: "amount must be greater than 0" });
+    return res.fail("amount must be greater than 0", 400);
   }
   if (!transactionReference && process.env.INTERSWITCH_STUB !== "true") {
-    return res.status(400).json({
-      success: false,
-      message: "transactionReference is required for Interswitch verification"
-    });
+    return res.fail("transactionReference is required for Interswitch verification", 400);
   }
 
   const campaign = await Campaign.findById(campaignId);
   if (!campaign) {
-    return res.status(404).json({ success: false, message: "Campaign not found" });
+    return res.fail("Campaign not found", 404);
   }
 
   const pendingDonation = await Donation.create({
@@ -44,7 +41,7 @@ const processDonation = async (req, res) => {
   if (!verification.verified) {
     pendingDonation.status = "failed";
     await pendingDonation.save();
-    return res.status(402).json({ success: false, message: "Payment verification failed" });
+    return res.fail("Payment verification failed", 402);
   }
 
   pendingDonation.status = "verified";
@@ -82,8 +79,7 @@ const processDonation = async (req, res) => {
     });
   }
 
-  return res.json({
-    success: true,
+  return res.ok({
     message: "Donation processed successfully",
     donation: {
       _id: pendingDonation._id,
@@ -103,12 +99,12 @@ const processDonation = async (req, res) => {
 const getReceipt = async (req, res) => {
   const donation = await Donation.findById(req.params.donationId).lean();
   if (!donation) {
-    return res.status(404).json({ success: false, message: "Donation not found" });
+    return res.fail("Donation not found", 404);
   }
 
   const campaign = await Campaign.findById(donation.campaignId).lean();
   if (!campaign) {
-    return res.status(404).json({ success: false, message: "Campaign not found" });
+    return res.fail("Campaign not found", 404);
   }
 
   res.setHeader("Content-Type", "application/pdf");

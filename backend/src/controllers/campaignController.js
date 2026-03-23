@@ -5,13 +5,13 @@ const createCampaign = async (req, res) => {
   const { title, description, targetAmount, deadline, imageUrl } = req.body;
   const numericTarget = Number(targetAmount);
   if (!title || !description || !numericTarget) {
-    return res.status(400).json({ success: false, message: "Title, description, and targetAmount are required" });
+    return res.fail("Title, description, and targetAmount are required", 400);
   }
   if (numericTarget <= 0) {
-    return res.status(400).json({ success: false, message: "targetAmount must be greater than 0" });
+    return res.fail("targetAmount must be greater than 0", 400);
   }
   if (deadline && Number.isNaN(Date.parse(deadline))) {
-    return res.status(400).json({ success: false, message: "Invalid deadline date" });
+    return res.fail("Invalid deadline date", 400);
   }
 
   const campaign = await Campaign.create({
@@ -23,13 +23,13 @@ const createCampaign = async (req, res) => {
     createdBy: req.user._id
   });
 
-  return res.status(201).json({ success: true, campaign });
+  return res.ok({ campaign }, 201);
 };
 
 const getCampaign = async (req, res) => {
   const campaign = await Campaign.findById(req.params.id).lean();
   if (!campaign) {
-    return res.status(404).json({ success: false, message: "Campaign not found" });
+    return res.fail("Campaign not found", 404);
   }
 
   const recentDonations = await Donation.find({ campaignId: campaign._id, status: "verified" })
@@ -38,8 +38,7 @@ const getCampaign = async (req, res) => {
     .select("donorName amount createdAt")
     .lean();
 
-  return res.json({
-    success: true,
+  return res.ok({
     campaign: {
       ...campaign,
       recentDonations: recentDonations.map((d) => ({
@@ -62,13 +61,13 @@ const listCampaigns = async (req, res) => {
     .select("title raisedAmount targetAmount donorCount status")
     .lean();
 
-  return res.json({ success: true, campaigns });
+  return res.ok({ campaigns });
 };
 
 const getProgress = async (req, res) => {
   const campaign = await Campaign.findById(req.params.id).lean();
   if (!campaign) {
-    return res.status(404).json({ success: false, message: "Campaign not found" });
+    return res.fail("Campaign not found", 404);
   }
 
   const percentComplete = Math.min(
@@ -76,8 +75,7 @@ const getProgress = async (req, res) => {
     Math.round((campaign.raisedAmount / campaign.targetAmount) * 100)
   );
 
-  return res.json({
-    success: true,
+  return res.ok({
     campaignId: campaign._id,
     raisedAmount: campaign.raisedAmount,
     targetAmount: campaign.targetAmount,
@@ -93,8 +91,7 @@ const recentDonations = async (req, res) => {
     .select("donorName amount createdAt")
     .lean();
 
-  return res.json({
-    success: true,
+  return res.ok({
     donations: donations.map((d) => ({
       donorName: d.donorName,
       amount: d.amount,
@@ -106,11 +103,11 @@ const recentDonations = async (req, res) => {
 const updateStatus = async (req, res) => {
   const { status } = req.body;
   if (!status) {
-    return res.status(400).json({ success: false, message: "Status is required" });
+    return res.fail("Status is required", 400);
   }
   const allowed = ["active", "inactive", "completed"];
   if (!allowed.includes(status)) {
-    return res.status(400).json({ success: false, message: "Invalid status value" });
+    return res.fail("Invalid status value", 400);
   }
 
   const campaign = await Campaign.findByIdAndUpdate(
@@ -120,10 +117,10 @@ const updateStatus = async (req, res) => {
   );
 
   if (!campaign) {
-    return res.status(404).json({ success: false, message: "Campaign not found" });
+    return res.fail("Campaign not found", 404);
   }
 
-  return res.json({ success: true, campaign });
+  return res.ok({ campaign });
 };
 
 module.exports = {
