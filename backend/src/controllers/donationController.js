@@ -1,7 +1,8 @@
 const PDFDocument = require("pdfkit");
+const { v4: uuidv4 } = require("uuid");
 const Donation = require("../models/Donation");
 const Campaign = require("../models/Campaign");
-const { verifyPayment } = require("../services/interswitch");
+const { verifyPayment, buildPaymentRequest } = require("../services/interswitch");
 const { getIo } = require("../socket");
 
 const processDonation = async (req, res) => {
@@ -96,6 +97,50 @@ const processDonation = async (req, res) => {
   });
 };
 
+const initiateDonation = async (req, res) => {
+  const { campaignId, amount, redirectUrl } = req.body;
+  const donorName = req.body.donorName || req.user.name;
+  const numericAmount = Number(amount);
+  if (!campaignId || !numericAmount || !donorName) {
+    return res.fail("campaignId, amount, and donorName are required", 400);
+  }
+  if (numericAmount <= 0) {
+    return res.fail("amount must be greater than 0", 400);
+  }
+
+  const campaign = await Campaign.findById(campaignId);
+  if (!campaign) {
+    return res.fail("Campaign not found", 404);
+  }
+
+  const transactionReference = `IB-${uuidv4()}`;
+  const amountKobo = Math.round(numericAmount * 100);
+
+  const pendingDonation = await Donation.create({
+    campaignId,
+    donorId: req.user._id,
+    donorName,
+    amount: numericAmount,
+    paymentMethod: "interswitch",
+    status: "pending",
+    transactionRef: transactionReference
+  });
+
+  const payment = buildPaymentRequest({
+    amountKobo,
+    transactionReference,
+    customerId: req.user._id.toString(),
+    redirectUrl
+  });
+
+  return res.ok({
+    paymentUrl: payment.paymentUrl,
+    fields: payment.fields,
+    donationId: pendingDonation._id,
+    transactionReference
+  });
+};
+
 const getReceipt = async (req, res) => {
   const donation = await Donation.findById(req.params.donationId).lean();
   if (!donation) {
@@ -126,4 +171,4 @@ const getReceipt = async (req, res) => {
   doc.end();
 };
 
-module.exports = { processDonation, getReceipt };
+module.exports = { processDonation, initiateDonation, getReceipt };

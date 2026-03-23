@@ -7,6 +7,61 @@ const buildHash = ({ productId, transactionReference, macKey }) => {
   return crypto.createHash("sha512").update(raw).digest("hex").toUpperCase();
 };
 
+const buildPaymentHash = ({
+  transactionReference,
+  productId,
+  payItemId,
+  amountKobo,
+  siteRedirectUrl,
+  macKey
+}) => {
+  const raw = `${transactionReference}${productId}${payItemId}${amountKobo}${siteRedirectUrl}${macKey}`;
+  return crypto.createHash("sha512").update(raw).digest("hex").toUpperCase();
+};
+
+const buildPaymentRequest = ({
+  amountKobo,
+  transactionReference,
+  customerId,
+  redirectUrl
+}) => {
+  const productId = process.env.INTERSWITCH_PRODUCT_ID;
+  const payItemId = process.env.INTERSWITCH_PAY_ITEM_ID;
+  const macKey = process.env.INTERSWITCH_MAC_KEY;
+  const paymentUrl =
+    process.env.INTERSWITCH_PAYMENT_URL ||
+    "https://sandbox.interswitchng.com/collections/w/pay";
+  const currency = process.env.INTERSWITCH_CURRENCY || "566";
+  const siteRedirectUrl = redirectUrl || process.env.INTERSWITCH_REDIRECT_URL;
+
+  if (!productId || !payItemId || !macKey || !siteRedirectUrl) {
+    throw new Error("Interswitch payment config missing");
+  }
+
+  const hash = buildPaymentHash({
+    transactionReference,
+    productId,
+    payItemId,
+    amountKobo,
+    siteRedirectUrl,
+    macKey
+  });
+
+  return {
+    paymentUrl,
+    fields: {
+      product_id: productId,
+      pay_item_id: payItemId,
+      amount: String(amountKobo),
+      currency,
+      site_redirect_url: siteRedirectUrl,
+      txn_ref: transactionReference,
+      cust_id: customerId || "",
+      hash
+    }
+  };
+};
+
 const getJson = (url, headers = {}) =>
   new Promise((resolve, reject) => {
     const req = https.request(
@@ -71,4 +126,4 @@ const verifyPayment = async ({
   };
 };
 
-module.exports = { verifyPayment };
+module.exports = { verifyPayment, buildPaymentRequest };

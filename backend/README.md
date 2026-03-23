@@ -61,6 +61,7 @@ Campaigns
 
 Donations
 
+- `POST /api/donation/initiate`
 - `POST /api/donation/process`
 - `GET /api/donation/receipt/:donationId`
 
@@ -124,6 +125,15 @@ curl -X POST http://localhost:4000/api/donation/process \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <JWT_TOKEN>" \
   -d '{"campaignId":"<CAMPAIGN_ID>","amount":5000,"donorName":"Ayo","transactionReference":"<TX_REF>"}'
+```
+
+Initiate donation (get payment form fields)
+
+```bash
+curl -X POST http://localhost:4000/api/donation/initiate \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <JWT_TOKEN>" \
+  -d '{"campaignId":"<CAMPAIGN_ID>","amount":5000,"redirectUrl":"https://your-frontend.com/payment/callback"}'
 ```
 
 ## Demo Flow
