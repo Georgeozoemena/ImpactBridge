@@ -2,6 +2,7 @@ const PDFDocument = require("pdfkit");
 const Donation = require("../models/Donation");
 const Campaign = require("../models/Campaign");
 const { verifyPayment } = require("../services/interswitch");
+const { getIo } = require("../socket");
 
 const processDonation = async (req, res) => {
   const { campaignId, amount, paymentMethod, transactionReference } = req.body;
@@ -54,6 +55,32 @@ const processDonation = async (req, res) => {
   campaign.raisedAmount += numericAmount;
   campaign.donorCount += 1;
   await campaign.save();
+
+  let io;
+  try {
+    io = getIo();
+  } catch (_err) {
+    io = null;
+  }
+
+  if (io) {
+    io.to(`campaign:${campaign._id}`).emit("campaignProgress", {
+      campaignId: campaign._id,
+      raisedAmount: campaign.raisedAmount,
+      targetAmount: campaign.targetAmount,
+      donorCount: campaign.donorCount,
+      percentComplete: Math.min(
+        100,
+        Math.round((campaign.raisedAmount / campaign.targetAmount) * 100)
+      )
+    });
+
+    io.to(`campaign:${campaign._id}`).emit("donationReceived", {
+      donorName: pendingDonation.donorName,
+      amount: pendingDonation.amount,
+      date: pendingDonation.createdAt
+    });
+  }
 
   return res.json({
     success: true,
