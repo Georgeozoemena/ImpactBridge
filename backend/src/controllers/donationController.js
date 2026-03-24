@@ -214,7 +214,7 @@ const getReceipt = async (req, res) => {
   doc.moveDown();
   doc.fontSize(12).text(`Donor Name: ${donation.donorName}`);
   doc.text(`Campaign: ${campaign.title}`);
-  doc.text(`Amount: ₦${donation.amount.toLocaleString("en-NG")}`);
+  doc.text(`Amount: NGN ${donation.amount.toLocaleString("en-NG")}`);
   doc.text(`Date: ${new Date(donation.createdAt).toISOString()}`);
   doc.text(`Transaction ID: ${donation.transactionRef}`);
   doc.moveDown();
