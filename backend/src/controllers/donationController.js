@@ -145,6 +145,54 @@ const initiateDonation = async (req, res) => {
   });
 };
 
+const initiateDonationTest = async (req, res) => {
+  if (process.env.NO_DB_TEST !== "true") {
+    return res.fail("Not available", 404);
+  }
+
+  const { amount, redirectUrl, donorEmail, donorName, transactionReference } = req.body;
+  const numericAmount = Number(amount);
+  if (!numericAmount || !donorEmail) {
+    return res.fail("amount and donorEmail are required", 400);
+  }
+
+  const txRef = transactionReference || `IB-TEST-${uuidv4()}`;
+  const amountKobo = Math.round(numericAmount * 100);
+
+  const payment = buildPaymentRequest({
+    amountKobo,
+    transactionReference: txRef,
+    customerId: "test-user",
+    customerEmail: donorEmail,
+    customerName: donorName || "Test Donor",
+    redirectUrl,
+    payItemName: "ImpactBridge Test"
+  });
+
+  return res.ok({
+    paymentUrl: payment.paymentUrl,
+    fields: payment.fields,
+    transactionReference: txRef
+  });
+};
+
+const verifyDonationTest = async (req, res) => {
+  if (process.env.NO_DB_TEST !== "true") {
+    return res.fail("Not available", 404);
+  }
+
+  const { transactionReference, amount } = req.body;
+  const numericAmount = Number(amount);
+  if (!transactionReference || !numericAmount) {
+    return res.fail("transactionReference and amount are required", 400);
+  }
+
+  const amountKobo = Math.round(numericAmount * 100);
+  const verification = await verifyPayment({ transactionReference, amountKobo });
+
+  return res.ok({ verification });
+};
+
 const getReceipt = async (req, res) => {
   const donation = await Donation.findById(req.params.donationId).lean();
   if (!donation) {
@@ -175,4 +223,4 @@ const getReceipt = async (req, res) => {
   doc.end();
 };
 
-module.exports = { processDonation, initiateDonation, getReceipt };
+module.exports = { processDonation, initiateDonation, initiateDonationTest, verifyDonationTest, getReceipt };

@@ -8,7 +8,11 @@ const connectDb = require("./config/db");
 const PORT = process.env.PORT || 4000;
 
 const start = async () => {
-  await connectDb();
+  if (process.env.SKIP_DB !== "true") {
+    await connectDb();
+  } else {
+    console.log("SKIP_DB=true - starting without MongoDB");
+  }
   const server = app.listen(PORT, () => {
     console.log(`ImpactBridge API running on port ${PORT}`);
   });

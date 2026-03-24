@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+<form method="POST" action="https://newwebpay.qa.interswitchng.com/collections/w/pay">
+  <input name="merchant_code" value="MX180293" />
+  <input name="pay_item_id" value="Default_Payable_MX180293" />
+  <input name="amount" value="5000" />
+  <input name="currency" value="566" />
+  <input name="site_redirect_url" value="http://localhost:4000/payment/callback" />
+  <input id="txn_ref" name="txn_ref" value="IB-TEST-INIIT" />
+  <input name="cust_id" value="test-user" />
+  <input name="cust_name" value="peter" />
+  <input name="cust_email" value="peter@example.com" />
+  <input name="pay_item_name" value="ImpactBridge Test" />
+  <button type="submit">Pay</button>
+</form>
+
+<script>
+  // Ensure a unique transaction reference for every test attempt
+  const rand = Math.random().toString(36).slice(2, 8).toUpperCase();
+  const ref = `IB-TEST-${Date.now()}-${rand}`;
+  document.getElementById("txn_ref").value = ref;
+</script>
+</body>
+</html>

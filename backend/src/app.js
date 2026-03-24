@@ -17,6 +17,7 @@ const app = express();
 app.use(helmet());
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: false }));
 app.use(morgan("dev"));
 app.use(response);
 
@@ -36,8 +37,9 @@ app.get("/health", (_req, res) => {
   res.ok({ status: "ok", name: "ImpactBridge API" });
 });
 
-app.get("/payment/callback", (req, res) => {
-  const data = JSON.stringify(req.query, null, 2);
+app.all("/payment/callback", (req, res) => {
+  const payload = { ...req.query, ...req.body };
+  const data = JSON.stringify(payload, null, 2);
   res.setHeader("Content-Type", "text/html");
   res.send(
     `<!doctype html>

@@ -101,6 +101,24 @@ Verification uses the Web Checkout requery endpoint:
 GET /collections/api/v1/gettransaction.json?merchantcode=...&transactionreference=...&amount=...
 ```
 
+Note: In Quickteller sandbox, requery may expect the amount in **major units (naira)**.
+The backend now tries **naira first**, then falls back to kobo if needed.
+
+## No-DB Test Endpoints (temporary)
+
+Set `NO_DB_TEST=true` to enable:
+
+- `POST /api/donation/initiate-test`
+- `POST /api/donation/verify-test`
+
+## Local Callback
+
+The backend includes a callback page that accepts GET/POST:
+
+- `GET/POST /payment/callback`
+
+If MongoDB is down, set `SKIP_DB=true` to start the server without DB.
+
 ## Socket.IO Events
 
 Client joins a campaign room:

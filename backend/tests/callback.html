@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>ImpactBridge Callback</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 24px; }
+      pre { background: #f6f6f6; padding: 12px; border-radius: 8px; }
+    </style>
+  </head>
+  <body>
+    <h2>Payment Callback</h2>
+    <p>If redirected here, the query params will appear below:</p>
+    <pre id="out"></pre>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const obj = {};
+      params.forEach((v, k) => (obj[k] = v));
+      document.getElementById("out").textContent = JSON.stringify(obj, null, 2);
+    </script>
+  </body>
+</html>

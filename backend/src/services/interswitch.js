@@ -84,19 +84,28 @@ const verifyPayment = async ({
     throw new Error("Interswitch config missing or invalid request payload");
   }
 
-  const endpoint = new URL("/collections/api/v1/gettransaction.json", baseUrl);
-  endpoint.searchParams.set("merchantcode", merchantCode);
-  endpoint.searchParams.set("transactionreference", transactionReference);
-  endpoint.searchParams.set("amount", String(amountKobo));
+  const makeRequest = async (amount) => {
+    const endpoint = new URL("/collections/api/v1/gettransaction.json", baseUrl);
+    endpoint.searchParams.set("merchantcode", merchantCode);
+    endpoint.searchParams.set("transactionreference", transactionReference);
+    endpoint.searchParams.set("amount", String(amount));
+    const { data } = await getJson(endpoint.toString(), { "Content-Type": "application/json" });
+    const responseCode =
+      data.ResponseCode || data.responseCode || data.responsecode || data.code || "";
+    return { data, responseCode };
+  };
 
-  const { data } = await getJson(endpoint.toString(), { "Content-Type": "application/json" });
+  // Quickteller sandbox expects amount in major units (naira), not kobo.
+  const amountMajor = Math.round(amountKobo / 100);
+  let result = await makeRequest(amountMajor);
 
-  const responseCode =
-    data.ResponseCode || data.responseCode || data.responsecode || data.code || "";
+  if (result.responseCode !== "00") {
+    result = await makeRequest(amountKobo);
+  }
 
   return {
-    verified: responseCode === "00",
-    responseCode,
+    verified: result.responseCode === "00",
+    responseCode: result.responseCode,
     transactionRef: transactionReference,
     paidAt: new Date()
   };
