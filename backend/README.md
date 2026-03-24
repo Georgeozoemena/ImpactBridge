@@ -71,6 +71,26 @@ Authentication
 - `POST /api/donor/register`
 - `POST /api/auth/login`
 
+Expected response (register):
+
+```json
+{
+  "success": true,
+  "user": { "_id": "abc123", "name": "LUTH", "email": "hospital@example.com", "role": "beneficiary" },
+  "token": "<JWT_TOKEN>"
+}
+```
+
+Expected response (login):
+
+```json
+{
+  "success": true,
+  "user": { "_id": "donor123", "name": "Ayo", "role": "donor", "email": "ayo@example.com" },
+  "token": "<JWT_TOKEN>"
+}
+```
+
 Campaigns
 
 - `POST /api/campaign/create` (beneficiary only)
@@ -80,17 +100,101 @@ Campaigns
 - `GET /api/campaign/:id/recent-donations`
 - `PATCH /api/campaign/:id/status` (beneficiary only)
 
+Expected response (create campaign):
+
+```json
+{
+  "success": true,
+  "campaign": {
+    "_id": "camp123",
+    "title": "Kidney Surgery Fund",
+    "description": "...",
+    "targetAmount": 500000,
+    "raisedAmount": 0,
+    "donorCount": 0,
+    "status": "active",
+    "createdBy": "abc123"
+  }
+}
+```
+
+Expected response (campaign progress):
+
+```json
+{
+  "success": true,
+  "campaignId": "camp123",
+  "raisedAmount": 205000,
+  "targetAmount": 500000,
+  "donorCount": 16,
+  "percentComplete": 41
+}
+```
+
 Donations
 
 - `POST /api/donation/initiate`
 - `POST /api/donation/process`
 - `GET /api/donation/receipt/:donationId`
 
+Expected response (initiate):
+
+```json
+{
+  "success": true,
+  "paymentUrl": "https://newwebpay.qa.interswitchng.com/collections/w/pay",
+  "fields": {
+    "merchant_code": "MX180293",
+    "pay_item_id": "Default_Payable_MX180293",
+    "amount": "500000",
+    "currency": "566",
+    "site_redirect_url": "https://your-frontend.com/payment/callback",
+    "txn_ref": "IB-...",
+    "cust_id": "user123",
+    "cust_name": "Ayo",
+    "cust_email": "ayo@example.com",
+    "pay_item_name": "Kidney Surgery Fund"
+  },
+  "donationId": "don123",
+  "transactionReference": "IB-..."
+}
+```
+
+Expected response (process donation):
+
+```json
+{
+  "success": true,
+  "message": "Donation processed successfully",
+  "donation": {
+    "_id": "don123",
+    "campaignId": "camp123",
+    "amount": 5000,
+    "donorName": "Ayo",
+    "date": "2026-03-24T12:45:00Z",
+    "responseCode": "00"
+  },
+  "updatedCampaign": {
+    "raisedAmount": 205000,
+    "donorCount": 16
+  }
+}
+```
+
 Admin
 
 - `POST /api/admin/create` (requires `x-admin-secret`)
 - `GET /api/users`
 - `GET /api/campaigns/all`
+
+Expected response (admin create):
+
+```json
+{
+  "success": true,
+  "admin": { "_id": "admin123", "name": "Admin", "email": "admin@impactbridge.io", "role": "admin" }
+}
+```
 
 ## Interswitch Verification (Quickteller Web Checkout)
 
