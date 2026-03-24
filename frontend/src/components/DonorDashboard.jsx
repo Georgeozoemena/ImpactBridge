@@ -15,9 +15,9 @@ export default function DonorDashboard() {
   return (
     <div className="fade-in">
       <div className="container" style={{ padding: '4rem 0' }}>
-         <header style={{ marginBottom: '4rem' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--text-muted)' }}>Donor Profile</span>
-            <h2 style={{ fontSize: '3rem', fontWeight: 800, marginTop: '1rem', letterSpacing: '-0.02em' }}>My Personal Impact</h2>
+        <header style={{ marginBottom: '4rem' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--text-muted)' }}>Donor Profile</span>
+          <h2 style={{ fontSize: '3rem', fontWeight: 800, marginTop: '1rem', letterSpacing: '-0.02em' }}>My Personal Impact</h2>
         </header>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem', marginBottom: '4rem' }}>

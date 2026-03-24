@@ -1,56 +1,36 @@
-export default function SuccessScreen({ amount, onFinish }) {
-  const handleDownloadReceipt = () => {
-    const receiptContent = `
-      ImpactBridge Receipt
-      -------------------
-      Donation ID: IB-592-XK9
-      Amount: ₦${amount.toLocaleString()}
-      Date: ${new Date().toLocaleDateString()}
-      Status: Verified
-      Thank you for your impact.
-    `;
-    const blob = new Blob([receiptContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Receipt-IB-592-XK9.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
+export default function SuccessScreen({ amount, campaignTitle, newPercent, onFinish }) {
   return (
     <div className="fade-in">
-      <div className="container" style={{ padding: '8rem 0', textAlign: 'center', minHeight: '80vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-        <div style={{ width: '100px', height: '100px', background: 'var(--primary)', borderRadius: 'var(--radius-full)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', marginBottom: '3rem', boxShadow: 'var(--shadow-lg)' }}>
-          ✓
-        </div>
+      <div className="container" style={{ padding: '8rem 1.5rem', textAlign: 'center', maxWidth: '800px' }}>
+        <div style={{ fontSize: '5rem', marginBottom: '3rem' }}>🎉</div>
         
-        <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Impact Confirmed</span>
-        <h2 style={{ fontSize: '4rem', fontWeight: 800, marginBottom: '2rem', letterSpacing: '-0.04em', lineHeight: 1.1 }}>Thank You for Your <br />Compassion.</h2>
+        <h2 style={{ fontSize: 'clamp(2.5rem, 6vw, 4rem)', fontWeight: 900, marginBottom: '2rem', lineHeight: 1.1 }}>
+          You just helped <br /><span style={{ color: 'var(--primary)' }}>save a life.</span>
+        </h2>
         
-        <p style={{ fontSize: '1.25rem', color: 'var(--text-muted)', maxWidth: '600px', margin: '0 auto 4rem', lineHeight: 1.6 }}>
-          Your gift of <strong>₦{amount.toLocaleString()}</strong> has been successfully processed and delivered to the beneficiary. You've just built a bridge to a healthier future.
+        <p style={{ fontSize: '1.25rem', color: 'var(--text-muted)', marginBottom: '5rem', lineHeight: 1.8 }}>
+          Your contribution of ₦{amount.toLocaleString()} moved {campaignTitle || 'the'} campaign to <span style={{ fontWeight: 800, color: 'var(--text-main)' }}>{newPercent || 'a new'}% funded.</span>
         </p>
-        
-        <div className="card" style={{ padding: '3rem', width: '100%', maxWidth: '500px', marginBottom: '4rem', background: 'var(--surface)', border: 'none', borderBottom: '1px solid var(--border)', borderRadius: 0 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '1.5rem', borderBottom: '1px solid var(--border)', marginBottom: '1.5rem' }}>
-            <span style={{ fontWeight: 600 }}>Donation ID</span>
-            <span style={{ fontFamily: 'monospace' }}>IB-592-XK9</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-            <span style={{ fontWeight: 600 }}>Amount</span>
-            <span style={{ fontWeight: 800, fontSize: '1.25rem' }}>₦{amount.toLocaleString()}</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ fontWeight: 600 }}>Date</span>
-            <span style={{ color: 'var(--text-muted)' }}>{new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+
+        <div style={{ background: 'white', padding: '4rem 2rem', border: '1px solid var(--border)', borderRadius: '4px', marginBottom: '5rem' }}>
+          <span className="label-muted">Campaign Impact</span>
+          <div className="stat-value" style={{ fontSize: 'clamp(3rem, 10vw, 6rem)', marginBottom: '1.5rem' }}>{newPercent || 'Success'}%</div>
+          <div className="progress-bar-thin" style={{ height: '4px' }}>
+            <div className="progress-fill-thin" style={{ width: `${newPercent || 100}%`, height: '100%' }} />
           </div>
         </div>
-        
-        <div style={{ display: 'flex', gap: '1.5rem' }}>
-          <button className="btn btn-secondary btn-lg" onClick={onFinish}>Return Home</button>
-          <button className="btn btn-outline btn-lg" onClick={handleDownloadReceipt}>Download Receipt</button>
+
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1.5rem', marginBottom: '4rem' }}>
+          <button className="btn btn-primary btn-lg">Share with friends</button>
+          <button className="btn btn-outline btn-lg" style={{ borderColor: '#25D366', color: '#128C7E' }}>Invite on WhatsApp</button>
         </div>
+
+        <button 
+          onClick={onFinish}
+          style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontWeight: 700, textDecoration: 'underline', cursor: 'pointer', fontSize: '1.1rem' }}
+        >
+          Back to home
+        </button>
       </div>
     </div>
   );

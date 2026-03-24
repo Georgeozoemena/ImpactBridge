@@ -1,58 +1,73 @@
-// API Services
-// Axios/Fetch from backend
+import axios from 'axios';
 
-const MOCK_DELAY = 800;
+const API_BASE_URL = 'http://localhost:4000/api';
+
+const apiInstance = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+
+// Add JWT token to requests if available
+apiInstance.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 export const api = {
   // Auth
   login: async (email, password) => {
-    await new Promise(resolve => setTimeout(resolve, API_DELAY));
-    return { 
-      user: { id: 1, name: 'John Donor', email, role: 'donor' },
-      token: 'jwt_access_token_8a2f'
-    };
+    const response = await apiInstance.post('/auth/login', { email, password });
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+    }
+    return response.data;
   },
-  
+
   register: async (userData) => {
-    await new Promise(resolve => setTimeout(resolve, API_DELAY));
-    return { 
-      user: { id: 2, name: userData.name, email: userData.email, role: 'donor' },
-      token: 'jwt_access_token_9b3e'
-    };
+    // Note: Backend has /api/beneficiary/register for beneficiaries
+    // If we want a general donor register, we might need to check if that exists
+    // For now, let's assume register is for beneficiaries as per our UI flow
+    const response = await apiInstance.post('/beneficiary/register', userData);
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+    }
+    return response.data;
+  },
+
+  logout: () => {
+    localStorage.removeItem('token');
   },
 
   // Campaigns
   getCampaigns: async () => {
-    await new Promise(resolve => setTimeout(resolve, API_DELAY));
-    return [
-      {
-        id: '1',
-        title: 'Emergency Surgery for Aisha',
-        description: 'Urgent funding needed for a critical heart surgery.',
-        goal_amount: 500000,
-        current_amount: 350000,
-        donor_count: 23,
-        status: 'active'
-      },
-      {
-        id: '2',
-        title: 'Hospital Oxygen Supply',
-        description: 'Help us purchase 10 new oxygen cylinders for St. Mary Hospital.',
-        goal_amount: 1000000,
-        current_amount: 600000,
-        donor_count: 45,
-        status: 'active'
-      }
-    ];
+    const response = await apiInstance.get('/campaign');
+    return response.data;
+  },
+
+  getCampaignById: async (id) => {
+    const response = await apiInstance.get(`/campaign/${id}`);
+    return response.data;
+  },
+
+  getCampaignProgress: async (id) => {
+    const response = await apiInstance.get(`/campaign/${id}/progress`);
+    return response.data;
   },
 
   // Donations
-  createDonation: async (donationData) => {
-    await new Promise(resolve => setTimeout(resolve, API_DELAY));
-    return {
-      status: 'pending',
-      checkout_url: 'https://sandbox.interswitchng.com/payment-gateway',
-      donation_id: 'don_123'
-    };
+  initiateDonation: async (donationData) => {
+    // Use initiate-test for now if we don't have real Paystack keys
+    const response = await apiInstance.post('/donation/initiate-test', donationData);
+    return response.data;
+  },
+
+  verifyDonation: async (reference) => {
+    const response = await apiInstance.post('/donation/verify-test', { reference });
+    return response.data;
   }
 };

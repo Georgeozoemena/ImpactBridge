@@ -1,111 +1,149 @@
 import { useState } from 'react';
+import { api } from '../services/api';
 
-export default function DonationModal({ campaignId, amount: initialAmount, onClose, onSuccess }) {
+export default function DonationModal({ campaignId, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
-  const [customAmount, setCustomAmount] = useState(initialAmount || 0);
+  const [amount, setAmount] = useState(5000);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [isMonthly, setIsMonthly] = useState(false);
 
-  const handleDonate = () => {
+  const quickAmounts = [1000, 5000, 10000];
+
+  const handleDonate = async () => {
+    if (!amount || amount <= 0) return;
+    
     setLoading(true);
-    setTimeout(() => {
+    try {
+      // We'll use processDonation directly for this demo sync 
+      // as it handles the verification (stubbed or real) in the backend
+      const response = await api.processDonation({
+        campaignId,
+        amount,
+        donorName: isAnonymous ? 'Anonymous' : name,
+        donorEmail: email || 'donor@example.com', // Fallback for demo
+        paymentMethod: 'interswitch',
+        transactionReference: `IB-UI-${Date.now()}` // Mock ref for stub
+      });
+
+      if (response) {
+        onSuccess(amount);
+      }
+    } catch (error) {
+      console.error("Donation failed:", error);
+      alert(error.response?.data?.message || "Donation failed. Please try again.");
+    } finally {
       setLoading(false);
-      onSuccess(customAmount || 5000);
-    }, 2000);
+    }
   };
 
   return (
-    <div style={{ 
-      position: 'fixed', 
-      top: 0, 
-      left: 0, 
-      width: '100%', 
-      height: '100%', 
-      background: 'rgba(26, 26, 26, 0.9)', 
-      backdropFilter: 'blur(8px)',
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
-      zIndex: 1000,
-      padding: '2rem'
-    }}>
-      <div className="card fade-in" style={{ 
-        width: '100%', 
-        maxWidth: '520px', 
-        padding: '4rem', 
-        position: 'relative',
-        background: 'var(--background)',
-        border: 'none',
-        borderRadius: 'var(--radius-lg)'
-      }}>
-        <button 
-          onClick={onClose}
-          style={{ position: 'absolute', top: '2rem', right: '2rem', fontSize: '1.5rem', fontWeight: 300 }}
-        >
-          ✕
-        </button>
-
-        <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--text-muted)', marginBottom: '1.5rem', display: 'block' }}>Complete Donation</span>
-        <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '2.5rem', letterSpacing: '-0.02em' }}>Finalize Impact.</h2>
-        
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          <div style={{ position: 'relative' }}>
-            <label style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.75rem', display: 'block' }}>Amount (NGN)</label>
-            <div style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', fontWeight: 800, fontSize: '1.25rem' }}>₦</span>
-              <input 
-                type="number" 
-                value={customAmount}
-                onChange={(e) => setCustomAmount(e.target.value)}
-                style={{ 
-                  width: '100%', 
-                  padding: '1.5rem 1.5rem 1.5rem 3rem', 
-                  borderRadius: 'var(--radius-md)', 
-                  border: '1px solid var(--border)', 
-                  background: 'var(--surface)',
-                  fontSize: '1.25rem',
-                  fontWeight: 700
-                }}
-              />
-            </div>
-          </div>
-
-          <div style={{ padding: '2rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div style={{ fontSize: '1.5rem' }}>🔒</div>
-              <div>
-                <div style={{ fontWeight: 800, fontSize: '0.85rem', marginBottom: '0.25rem' }}>Secure Transaction</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Verified by Interswitch Webpay</div>
-              </div>
-            </div>
-          </div>
-
-          <button 
-            className="btn btn-secondary btn-lg" 
-            style={{ 
-               width: '100%', 
-               height: '70px', 
-               fontSize: '1.125rem', 
-               display: 'flex', 
-               alignItems: 'center', 
-               justifyContent: 'center', 
-               gap: '1rem',
-               background: loading ? 'var(--secondary)' : 'var(--secondary)'
-            }} 
-            onClick={handleDonate}
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                <span className="spinner" style={{ width: '24px', height: '24px', border: '3px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></span>
-                Verifying with Webpay...
-              </>
-            ) : (
-              <>
-                <img src="/interswitch-logo.png" alt="" style={{ height: '24px', filter: 'brightness(0) invert(1)' }} />
-                Pay with Interswitch
-              </>
-            )}
-          </button>
+    <div className="modal-overlay">
+      <div className="modal-content container fade-in" style={{ textAlign: 'center', maxHeight: '90vh', overflowY: 'auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', position: 'absolute', top: '2rem', right: '2rem', zIndex: 10 }}>
+          <button onClick={onClose} style={{ fontSize: '2rem', background: 'none', border: 'none', cursor: 'pointer', opacity: 0.5 }}>✕</button>
         </div>
+        
+        <div className="toggle-reveal" style={{ marginBottom: '4rem', marginTop: '2rem' }}>
+          <div 
+            className={`toggle-option ${!isMonthly ? 'active' : ''}`} 
+            onClick={() => setIsMonthly(false)}
+          >
+            One-Time
+          </div>
+          <div 
+            className={`toggle-option ${isMonthly ? 'active' : ''}`} 
+            onClick={() => setIsMonthly(true)}
+          >
+            Monthly
+          </div>
+        </div>
+
+        <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 900, marginBottom: '1rem', lineHeight: 1 }}>Choose your amount</h2>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '5rem', fontSize: '1.25rem' }}>Every naira moves the patient closer to surgery</p>
+
+        <div className="amount-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1.5rem', width: '100%', maxWidth: '500px', margin: '0 auto 5rem' }}>
+          {quickAmounts.map(val => (
+            <button 
+              key={val}
+              onClick={() => setAmount(val)}
+              style={{ 
+                padding: '1.5rem', 
+                borderRadius: '100px', 
+                border: amount === val ? 'none' : '1.5px solid var(--border)',
+                background: amount === val ? 'var(--primary)' : 'white',
+                color: amount === val ? 'white' : 'var(--text-main)',
+                fontWeight: 800,
+                fontSize: '1.1rem',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              ₦{val.toLocaleString()}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ marginBottom: '5rem', maxWidth: '500px', margin: '0 auto 5rem' }}>
+          <span className="label-muted" style={{ textAlign: 'center' }}>Custom Amount (₦)</span>
+          <input 
+            type="number" 
+            value={amount}
+            onChange={(e) => setAmount(Number(e.target.value))}
+            placeholder="0"
+            style={{ width: '100%', padding: '1.5rem 0', border: 'none', borderBottom: '2px solid var(--border)', fontSize: '4rem', fontWeight: 900, fontFamily: 'var(--font-display)', outline: 'none', textAlign: 'center', background: 'transparent' }}
+          />
+        </div>
+
+        <div style={{ marginBottom: '6rem', maxWidth: '500px', margin: '0 auto 6rem', textAlign: 'left' }}>
+          <div style={{ marginBottom: '2.5rem' }}>
+            <span className="label-muted">Your Name</span>
+            <input 
+              type="text" 
+              placeholder="John Doe"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              disabled={isAnonymous}
+              style={{ width: '100%', padding: '1.5rem 0', border: 'none', borderBottom: '1px solid var(--border)', fontSize: '1.25rem', outline: 'none', opacity: isAnonymous ? 0.3 : 1, fontWeight: 700, background: 'transparent' }}
+            />
+          </div>
+          
+          <div style={{ marginBottom: '2.5rem' }}>
+            <span className="label-muted">Email Address</span>
+            <input 
+              type="email" 
+              placeholder="john@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={{ width: '100%', padding: '1.5rem 0', border: 'none', borderBottom: '1px solid var(--border)', fontSize: '1.25rem', outline: 'none', fontWeight: 700, background: 'transparent' }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <input 
+              type="checkbox" 
+              id="anon" 
+              checked={isAnonymous} 
+              onChange={(e) => setIsAnonymous(e.target.checked)}
+              style={{ width: '24px', height: '24px', accentColor: 'var(--primary)' }}
+            />
+            <label htmlFor="anon" style={{ fontSize: '1.1rem', fontWeight: 700 }}>Donate anonymously</label>
+          </div>
+        </div>
+
+        <button 
+          className="btn btn-primary btn-lg" 
+          disabled={loading || !amount}
+          onClick={handleDonate}
+          style={{ width: '100%', maxWidth: '500px' }}
+        >
+          {loading ? 'Verifying with Interswitch...' : 'Save a Life Now'}
+        </button>
+        
+        <p style={{ textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-muted)', marginTop: '3rem', fontWeight: 600, paddingBottom: '2rem' }}>
+          🔒 Secured & verified · Interswitch
+        </p>
       </div>
     </div>
   );

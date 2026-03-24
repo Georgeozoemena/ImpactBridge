@@ -1,104 +1,124 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 
-export default function Landing({ onStartCampaign, onDonate }) {
+export default function Landing({ onDonate, onStartCampaign }) {
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [tickerIndex, setTickerIndex] = useState(0);
+  const navigate = useNavigate();
+
+  const activities = [
+    { name: 'Ayo', amount: '2,000', context: "Chioma's Surgery" },
+    { name: 'Grace', amount: '15,000', context: "The General Fund" },
+    { name: 'Anonymous', amount: '5,000', context: "Baby Tunde" }
+  ];
 
   useEffect(() => {
-    api.getCampaigns().then(data => {
-      setCampaigns(data);
-      setLoading(false);
-    });
+    const fetchCampaigns = async () => {
+      try {
+        const data = await api.getCampaigns();
+        setCampaigns(data);
+      } catch (error) {
+        console.error("Failed to fetch campaigns:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCampaigns();
   }, []);
 
-  const featured = campaigns[0];
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTickerIndex((prev) => (prev + 1) % activities.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="fade-in">
-      <section className="hero-bg" style={{ backgroundImage: 'url("/hero-impact.png")' }}>
-        <div className="hero-overlay">
-          <h1 className="hero-title">
-            Turn Payments Into <span style={{ color: 'var(--primary-dark)' }}>Impact</span> For Health Causes
+      {/* Editorial Hero Section */}
+      <section style={{ background: 'var(--background)', padding: '6rem 0 4rem' }}>
+        <div className="container">
+          <h1 className="editorial-heading" style={{ fontSize: 'clamp(3.5rem, 12vw, 8.5rem)', fontWeight: 900, lineHeight: 0.85, textAlign: 'center', color: 'var(--text-main)', letterSpacing: '-0.05em' }}>
+            Turn Payments Into Impact
+            <div className="oval-mask">
+              <img src="https://images.unsplash.com/photo-1542810634-71277d95dcbb?auto=format&fit=crop&q=80&w=400" alt="Hope" />
+            </div>
+            for Health Cause
           </h1>
-          <p style={{ fontSize: '1.125rem', color: 'var(--text-muted)', marginBottom: '2.5rem', lineHeight: 1.6 }}>
-            When families gain access to quality healthcare, they recover the time to learn, work, and thrive. We build bridges to impactful medical causes.
+          <p style={{ textAlign: 'center', width: '100%', maxWidth: '600px', margin: '3rem auto 4rem', fontSize: '1.25rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+            Every naira you contribute saves a real life. We bridge the gap between verified medical needs and your compassion.
           </p>
-          <button className="btn btn-primary btn-lg" onClick={() => onDonate()}>Donate Now</button>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1.5rem', marginBottom: '6rem' }}>
+            <button className="btn btn-primary btn-lg" onClick={() => onDonate()}>Donate Now</button>
+            <button className="btn btn-outline btn-lg" onClick={onStartCampaign}>Start a Campaign</button>
+          </div>
         </div>
       </section>
 
-      <div style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
-        <div className="container">
-          <section style={{ padding: '8rem 0', display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '6rem' }}>
-            <div>
-              <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--text-muted)' }}>About ImpactBridge</span>
-              <h2 style={{ fontSize: '2.75rem', fontWeight: 800, marginTop: '1.5rem', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
-                Together, We Restore Access to Care.
-              </h2>
-            </div>
-            <div>
-              <p style={{ fontSize: '1.25rem', color: 'var(--text-main)', marginBottom: '3.5rem', fontWeight: 500 }}>
-                Every community deserves reliable, safe healthcare. At ImpactBridge, we transform medical funding through transparency and local partnerships.
-              </p>
-              <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '4rem' }}>
-                 <button className="btn btn-secondary" onClick={onStartCampaign}>Start a Campaign</button>
-                 <button className="btn btn-outline" onClick={() => onDonate()}>Explore Causes</button>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '3rem' }}>
-                <div>
-                  <div style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '0.5rem' }}>50+</div>
-                  <div style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Hospitals</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '0.5rem' }}>1.2M+</div>
-                  <div style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Lives Impacted</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '0.5rem' }}>150+</div>
-                  <div style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Units Built</div>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
-      </div>
-
       <div className="container">
-        <section style={{ padding: '8rem 0' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '5rem' }}>
-            <div>
-              <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--text-muted)' }}>Make a Difference Today</span>
-              <h2 style={{ fontSize: '2.75rem', fontWeight: 800, marginTop: '1.5rem' }}>Urgent Campaigns</h2>
-            </div>
-            <button className="btn btn-outline" onClick={() => onDonate()}>View All Programs</button>
-          </div>
+        {/* Live Activity Ticker */}
+        <div style={{ marginBottom: '8rem', fontSize: '1.125rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', background: 'white', border: '1px solid var(--border)', borderRadius: '100px', width: 'fit-content', margin: '0 auto 8rem' }}>
+          <span className="pulse-dot"></span>
+          <span>{activities[tickerIndex].name} just donated ₦{activities[tickerIndex].amount} to <span style={{ color: 'var(--primary)' }}>{activities[tickerIndex].context}</span></span>
+        </div>
 
-          {loading ? (
-            <div style={{ textAlign: 'center', padding: '4rem' }}>Loading impact...</div>
-          ) : featured && (
-            <div className="card" style={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', border: 'none', background: 'transparent' }}>
-              <div style={{ height: '500px', background: '#F5F5F5', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
-                 <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999', fontSize: '1.25rem', fontWeight: 600 }}>Campaign Visual</div>
-              </div>
-              <div style={{ padding: '0 4rem' }}>
-                <h3 style={{ fontSize: '2.5rem', marginBottom: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em' }}>{featured.title}</h3>
-                <p style={{ color: 'var(--text-muted)', marginBottom: '3rem', fontSize: '1.125rem', lineHeight: 1.8 }}>{featured.description}</p>
-                
-                <div style={{ marginBottom: '3.5rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.25rem', fontWeight: 800 }}>
-                    <span style={{ fontSize: '1.5rem' }}>₦{featured.current_amount.toLocaleString()} <span style={{ fontWeight: 400, color: 'var(--text-muted)', fontSize: '0.9rem' }}>raised of ₦{featured.goal_amount.toLocaleString()}</span></span>
-                    <span style={{ color: 'var(--primary-dark)', fontSize: '1.25rem' }}>{Math.round((featured.current_amount / featured.goal_amount) * 100)}%</span>
-                  </div>
-                  <div style={{ height: '4px', background: '#E5E5E5', borderRadius: 'var(--radius-full)' }}>
-                    <div style={{ height: '100%', width: `${(featured.current_amount / featured.goal_amount) * 100}%`, background: 'var(--secondary)', borderRadius: 'var(--radius-full)' }} />
-                  </div>
-                </div>
-                
-                <button className="btn btn-secondary btn-lg" style={{ width: '100%' }} onClick={() => onDonate(featured.id)}>Support This Cause</button>
-              </div>
+        {/* Horizontal Campaign Slider */}
+        <section style={{ marginBottom: '10rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '4rem' }}>
+            <div>
+              <span className="label-muted">Immediate Needs</span>
+              <h2 className="underline-accent" style={{ fontSize: '2.5rem' }}>Active Campaigns</h2>
             </div>
-          )}
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button className="nav-btn-circle">←</button>
+              <button className="nav-btn-circle">→</button>
+            </div>
+          </div>
+          
+          <div className="scroll-slider">
+            {loading ? (
+              <div style={{ padding: '4rem', textAlign: 'center', width: '100%' }}>Loading campaigns...</div>
+            ) : campaigns.length === 0 ? (
+              <div style={{ padding: '4rem', textAlign: 'center', width: '100%' }}>No active campaigns found.</div>
+            ) : campaigns.map((camp) => (
+              <div key={camp._id || camp.id} className="card-editorial" onClick={() => navigate(`/campaign/${camp._id || camp.id}`)} style={{ cursor: 'pointer' }}>
+                <div style={{ height: '300px', background: '#EEE', marginBottom: '2rem', borderRadius: '4px', overflow: 'hidden' }}>
+                  <img src={camp.image_url || `https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&q=80&w=800`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={camp.title} />
+                </div>
+                <div className="pill-urgency" style={{ marginBottom: '1.5rem' }}>{camp.urgency || 'Urgent'}</div>
+                <h3 style={{ fontSize: '1.75rem', marginBottom: '1rem', lineHeight: 1.2 }}>{camp.title}</h3>
+                <p style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '2.5rem', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  {camp.description}
+                </p>
+                
+                <div className="progress-bar-thin" style={{ height: '4px', marginBottom: '1.5rem' }}>
+                  <div className="progress-fill-thin" style={{ width: `${Math.min((camp.current_amount / camp.goal_amount) * 100, 100)}%`, height: '100%' }} />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1rem', fontWeight: 800 }}>
+                  <span>₦{camp.current_amount.toLocaleString()}</span>
+                  <span style={{ color: 'var(--primary)' }}>{Math.round((camp.current_amount / camp.goal_amount) * 100)}%</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Massive Global Stats */}
+        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '4rem', borderTop: '1px solid var(--border)', paddingTop: '8rem', paddingBottom: '10rem' }}>
+          <div className="reveal-up">
+            <div className="stat-value">12.4k</div>
+            <div className="label-massive">Empowered Donors</div>
+          </div>
+          <div className="reveal-up" style={{ animationDelay: '0.1s' }}>
+            <div className="stat-value">850</div>
+            <div className="label-massive">Medical Campaigns</div>
+          </div>
+          <div className="reveal-up" style={{ animationDelay: '0.2s' }}>
+            <div className="stat-value">2.1k</div>
+            <div className="label-massive">Lives Saved Today</div>
+          </div>
         </section>
       </div>
     </div>
