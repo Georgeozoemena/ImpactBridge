@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { api } from '../services/api';
 
 export default function BeneficiaryDashboard() {
   const [stats, setStats] = useState({ totalReceived: 0, donorCount: 0, goalProgress: 0 });
@@ -7,89 +6,107 @@ export default function BeneficiaryDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Mock dashboard data
     setTimeout(() => {
       setStats({ totalReceived: 950000, donorCount: 68, goalProgress: 76 });
       setDonations([
-        { id: 1, donor: 'Ayo', amount: 5000, date: '2 mins ago' },
-        { id: 2, donor: 'Chioma', amount: 12000, date: '15 mins ago' },
-        { id: 3, donor: 'Anonymous', amount: 2000, date: '1 hour ago' },
+        { id: 1, donor: 'Ayo O.', amount: 5000, date: '2 mins ago' },
+        { id: 2, donor: 'Chioma A.', amount: 12000, date: '15 mins ago' },
+        { id: 3, donor: 'Anonymous donor', amount: 2000, date: '1 hour ago' },
       ]);
       setLoading(false);
     }, 1000);
   }, []);
 
-  if (loading) return <div style={{ textAlign: 'center', padding: '4rem' }}>Loading dashboard...</div>;
+  if (loading) return (
+    <div className="container" style={{ textAlign: 'center', padding: '10rem 0' }}>
+       <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>Loading dashboard...</div>
+    </div>
+  );
 
   return (
-    <div className="fade-in" style={{ padding: '2rem 0' }}>
-      <header style={{ marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-        <div>
-          <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Beneficiary Dashboard</h2>
-          <p style={{ color: 'var(--text-muted)' }}>Real-time overview of your active campaigns.</p>
-        </div>
-        <button className="btn btn-primary">+ Create New Campaign</button>
-      </header>
+    <div className="fade-in">
+      <div className="container" style={{ padding: '4rem 0' }}>
+        <header style={{ marginBottom: '4rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+          <div>
+            <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--text-muted)' }}>Hospital Administration</span>
+            <h2 style={{ fontSize: '3rem', fontWeight: 800, marginTop: '1rem', letterSpacing: '-0.02em' }}>Impact Overview</h2>
+          </div>
+          <button className="btn btn-secondary">+ Request Funding</button>
+        </header>
 
-      {/* Stats Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
-        <div className="glass" style={{ padding: '1.5rem', borderRadius: 'var(--radius-md)' }}>
-          <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Total Received</div>
-          <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--primary)' }}>₦{stats.totalReceived.toLocaleString()}</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem', marginBottom: '4rem' }}>
+          <div className="card" style={{ padding: '3rem', border: 'none', background: 'var(--surface)', borderBottom: '1px solid var(--border)', borderRadius: 0 }}>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem' }}>Total Funds Raised</div>
+            <div style={{ fontSize: '3rem', fontWeight: 800 }}>₦{stats.totalReceived.toLocaleString()}</div>
+          </div>
+          <div className="card" style={{ padding: '3rem', border: 'none', background: 'var(--surface)', borderBottom: '1px solid var(--border)', borderRadius: 0 }}>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem' }}>Verified Supporters</div>
+            <div style={{ fontSize: '3rem', fontWeight: 800 }}>{stats.donorCount}</div>
+          </div>
+          <div className="card" style={{ padding: '3rem', border: 'none', background: 'var(--surface)', borderBottom: '1px solid var(--border)', borderRadius: 0 }}>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem' }}>Goal Achievement</div>
+            <div style={{ fontSize: '3rem', fontWeight: 800, color: 'var(--primary-dark)' }}>{stats.goalProgress}%</div>
+          </div>
         </div>
-        <div className="glass" style={{ padding: '1.5rem', borderRadius: 'var(--radius-md)' }}>
-          <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Contributor Count</div>
-          <div style={{ fontSize: '2rem', fontWeight: 800 }}>{stats.donorCount}</div>
-        </div>
-        <div className="glass" style={{ padding: '1.5rem', borderRadius: 'var(--radius-md)' }}>
-          <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>Goal Progress</div>
-          <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--secondary)' }}>{stats.goalProgress}%</div>
-        </div>
-      </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem' }}>
-        {/* Recent Activity */}
-        <section className="glass" style={{ padding: '2rem', borderRadius: 'var(--radius-lg)' }}>
-          <h3 style={{ marginBottom: '1.5rem' }}>Recent Donations</h3>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border)' }}>
-                <th style={{ padding: '1rem 0', color: 'var(--text-muted)', fontWeight: 600 }}>Donor</th>
-                <th style={{ padding: '1rem 0', color: 'var(--text-muted)', fontWeight: 600 }}>Amount</th>
-                <th style={{ padding: '1rem 0', color: 'var(--text-muted)', fontWeight: 600 }}>Time</th>
-              </tr>
-            </thead>
-            <tbody>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '4rem' }}>
+          <section>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '2.5rem' }}>Recent Activity</h3>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
               {donations.map(d => (
-                <tr key={d.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                  <td style={{ padding: '1rem 0', fontWeight: 500 }}>{d.donor}</td>
-                  <td style={{ padding: '1rem 0', fontWeight: 700, color: 'var(--secondary)' }}>₦{d.amount.toLocaleString()}</td>
-                  <td style={{ padding: '1rem 0', color: 'var(--text-muted)', fontSize: '0.875rem' }}>{d.date}</td>
-                </tr>
+                <div key={d.id} style={{ padding: '1.5rem 0', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '1.125rem' }}>{d.donor}</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Transaction verified • {d.date}</div>
+                  </div>
+                  <div style={{ fontWeight: 800, fontSize: '1.25rem' }}>₦{d.amount.toLocaleString()}</div>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </section>
+            </div>
+            <button className="btn btn-outline" style={{ marginTop: '3rem', width: '100%' }}>View All Transactions</button>
+          </section>
 
-        {/* Campaign Health */}
-        <section className="glass" style={{ padding: '2rem', borderRadius: 'var(--radius-lg)' }}>
-          <h3 style={{ marginBottom: '1.5rem' }}>Campaign Insights</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.875rem' }}>
-                <span>Daily Velocity</span>
-                <span style={{ color: 'var(--secondary)', fontWeight: 600 }}>High</span>
+          <section>
+            <div className="card" style={{ padding: '3rem', background: 'var(--secondary)', color: 'white', borderRadius: 'var(--radius-lg)', marginBottom: '2.5rem' }}>
+              <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1.5rem' }}>Campaign Velocity</h3>
+              <p style={{ fontSize: '1rem', opacity: 0.8, marginBottom: '2.5rem', lineHeight: 1.6 }}>
+                At your current donation rate, you are expected to reach your goal in <strong>4 days</strong>. Consistent updates to your story improve visibility.
+              </p>
+              <div style={{ marginBottom: '2.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontSize: '0.85rem', fontWeight: 700 }}>
+                  <span>Daily Target</span>
+                  <span>85% Achieved</span>
+                </div>
+                <div style={{ height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: 'var(--radius-full)' }}>
+                  <div style={{ height: '100%', width: '85%', background: 'var(--primary)', borderRadius: 'var(--radius-full)' }} />
+                </div>
               </div>
-              <div style={{ height: '6px', background: 'var(--surface)', borderRadius: 'var(--radius-full)' }}>
-                <div style={{ height: '100%', width: '85%', background: 'var(--secondary)', borderRadius: 'var(--radius-full)' }} />
+              <button className="btn btn-primary" style={{ width: '100%', border: 'none' }}>Share Campaign</button>
+            </div>
+
+            <div className="card" style={{ padding: '3rem', background: 'var(--surface)', border: '1px solid var(--border)' }}>
+              <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '2rem' }}>Program Milestones</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                {[
+                  { label: 'The Spark (First 10%)', progress: 100, icon: '⚡' },
+                  { label: 'Critical Mass (50%)', progress: 100, icon: '🔥' },
+                  { label: 'Final Stretch (75%)', progress: 80, icon: '🚀' },
+                  { label: 'Mission Met (100%)', progress: 0, icon: '🏆' },
+                ].map((m, i) => (
+                  <div key={i} style={{ opacity: m.progress > 0 ? 1 : 0.4 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.85rem' }}>
+                      <span style={{ fontWeight: 700 }}>{m.icon} {m.label}</span>
+                      <span style={{ fontWeight: 800 }}>{m.progress}%</span>
+                    </div>
+                    <div style={{ height: '4px', background: '#EEE', borderRadius: 'var(--radius-full)' }}>
+                      <div style={{ height: '100%', width: `${m.progress}%`, background: 'var(--primary-dark)', borderRadius: 'var(--radius-full)' }} />
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', lineHeight: '1.5' }}>
-              At your current donation rate, you are expected to reach your goal of ₦1.2M in <strong>4 days</strong>.
-            </p>
-            <button className="btn btn-outline" style={{ width: '100%' }}>Download Full Report</button>
-          </div>
-        </section>
+          </section>
+        </div>
       </div>
     </div>
   );

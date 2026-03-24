@@ -16,63 +16,91 @@ export default function Landing({ onStartCampaign, onDonate }) {
 
   return (
     <div className="fade-in">
-      <section style={{ padding: '4rem 0', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '3.5rem', fontWeight: 800, marginBottom: '1.5rem', lineHeight: 1.1 }}>
-          Turn <span style={{ color: 'var(--primary)' }}>Payments</span> Into <br />
-          <span style={{ color: 'var(--secondary)' }}>Real-World Impact</span>
-        </h1>
-        <p style={{ fontSize: '1.25rem', color: 'var(--text-muted)', maxWidth: '600px', margin: '0 auto 2.5rem' }}>
-          ImpactBridge connects donors directly to critical healthcare causes with 100% transparency and real-time tracking.
-        </p>
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-          <button className="btn btn-primary btn-lg" onClick={onDonate}>Donate Now</button>
-          <button className="btn btn-outline btn-lg" onClick={onStartCampaign}>Start a Campaign</button>
+      <section className="hero-bg" style={{ backgroundImage: 'url("/hero-impact.png")' }}>
+        <div className="hero-overlay">
+          <h1 className="hero-title">
+            Turn Payments Into <span style={{ color: 'var(--primary-dark)' }}>Impact</span> For Health Causes
+          </h1>
+          <p style={{ fontSize: '1.125rem', color: 'var(--text-muted)', marginBottom: '2.5rem', lineHeight: 1.6 }}>
+            When families gain access to quality healthcare, they recover the time to learn, work, and thrive. We build bridges to impactful medical causes.
+          </p>
+          <button className="btn btn-primary btn-lg" onClick={() => onDonate()}>Donate Now</button>
         </div>
       </section>
 
-      <div className="glass" style={{ padding: '0.75rem', borderRadius: 'var(--radius-full)', display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '4rem', overflow: 'hidden' }}>
-        <span style={{ background: 'var(--secondary)', color: 'white', padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)', fontSize: '0.75rem', fontWeight: 700 }}>LIVE</span>
-        <div className="ticker-text" style={{ fontSize: '0.875rem', fontWeight: 500 }}>
-          Ayo just donated ₦2,000 to "Emergency Surgery for Aisha" • 2 minutes ago
+      <div style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
+        <div className="container">
+          <section style={{ padding: '8rem 0', display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '6rem' }}>
+            <div>
+              <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--text-muted)' }}>About ImpactBridge</span>
+              <h2 style={{ fontSize: '2.75rem', fontWeight: 800, marginTop: '1.5rem', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
+                Together, We Restore Access to Care.
+              </h2>
+            </div>
+            <div>
+              <p style={{ fontSize: '1.25rem', color: 'var(--text-main)', marginBottom: '3.5rem', fontWeight: 500 }}>
+                Every community deserves reliable, safe healthcare. At ImpactBridge, we transform medical funding through transparency and local partnerships.
+              </p>
+              <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '4rem' }}>
+                 <button className="btn btn-secondary" onClick={onStartCampaign}>Start a Campaign</button>
+                 <button className="btn btn-outline" onClick={() => onDonate()}>Explore Causes</button>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '3rem' }}>
+                <div>
+                  <div style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '0.5rem' }}>50+</div>
+                  <div style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Hospitals</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '0.5rem' }}>1.2M+</div>
+                  <div style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Lives Impacted</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '0.5rem' }}>150+</div>
+                  <div style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Units Built</div>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
       </div>
 
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: '2rem' }}>Loading impact...</div>
-      ) : featured && (
-        <section style={{ marginBottom: '4rem' }}>
-          <h2 style={{ marginBottom: '2rem' }}>Featured Campaign</h2>
-          <div className="glass" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', padding: '2rem', borderRadius: 'var(--radius-lg)' }}>
-            <div style={{ background: '#e2e8f0', borderRadius: 'var(--radius-md)', aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: '#94a3b8' }}>Campaign Image</span>
+      <div className="container">
+        <section style={{ padding: '8rem 0' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '5rem' }}>
+            <div>
+              <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--text-muted)' }}>Make a Difference Today</span>
+              <h2 style={{ fontSize: '2.75rem', fontWeight: 800, marginTop: '1.5rem' }}>Urgent Campaigns</h2>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>{featured.title}</h3>
-              <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>{featured.description}</p>
-              
-              <div style={{ marginBottom: '1.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 600 }}>
-                  <span>₦{featured.current_amount.toLocaleString()} raised</span>
-                  <span>{Math.round((featured.current_amount / featured.goal_amount) * 100)}%</span>
-                </div>
-                <div style={{ height: '12px', background: 'var(--surface)', borderRadius: 'var(--radius-full)', overflow: 'hidden' }}>
-                  <div style={{ 
-                    height: '100%', 
-                    width: `${(featured.current_amount / featured.goal_amount) * 100}%`, 
-                    background: 'linear-gradient(90deg, var(--primary), var(--secondary))',
-                    transition: 'width 1s ease-out'
-                  }} />
-                </div>
-                <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                    Target: ₦{featured.goal_amount.toLocaleString()} • {featured.donor_count} Donors
-                </div>
-              </div>
-
-              <button className="btn btn-primary" onClick={() => onDonate(featured.id)}>Support This Cause</button>
-            </div>
+            <button className="btn btn-outline" onClick={() => onDonate()}>View All Programs</button>
           </div>
+
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '4rem' }}>Loading impact...</div>
+          ) : featured && (
+            <div className="card" style={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', border: 'none', background: 'transparent' }}>
+              <div style={{ height: '500px', background: '#F5F5F5', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+                 <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999', fontSize: '1.25rem', fontWeight: 600 }}>Campaign Visual</div>
+              </div>
+              <div style={{ padding: '0 4rem' }}>
+                <h3 style={{ fontSize: '2.5rem', marginBottom: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em' }}>{featured.title}</h3>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '3rem', fontSize: '1.125rem', lineHeight: 1.8 }}>{featured.description}</p>
+                
+                <div style={{ marginBottom: '3.5rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.25rem', fontWeight: 800 }}>
+                    <span style={{ fontSize: '1.5rem' }}>₦{featured.current_amount.toLocaleString()} <span style={{ fontWeight: 400, color: 'var(--text-muted)', fontSize: '0.9rem' }}>raised of ₦{featured.goal_amount.toLocaleString()}</span></span>
+                    <span style={{ color: 'var(--primary-dark)', fontSize: '1.25rem' }}>{Math.round((featured.current_amount / featured.goal_amount) * 100)}%</span>
+                  </div>
+                  <div style={{ height: '4px', background: '#E5E5E5', borderRadius: 'var(--radius-full)' }}>
+                    <div style={{ height: '100%', width: `${(featured.current_amount / featured.goal_amount) * 100}%`, background: 'var(--secondary)', borderRadius: 'var(--radius-full)' }} />
+                  </div>
+                </div>
+                
+                <button className="btn btn-secondary btn-lg" style={{ width: '100%' }} onClick={() => onDonate(featured.id)}>Support This Cause</button>
+              </div>
+            </div>
+          )}
         </section>
-      )}
+      </div>
     </div>
   );
 }

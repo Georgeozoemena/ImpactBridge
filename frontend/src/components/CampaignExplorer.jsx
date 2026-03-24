@@ -19,65 +19,72 @@ export default function CampaignExplorer({ onDonate }) {
   );
 
   return (
-    <div className="fade-in" style={{ padding: '2rem 0' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
-        <div>
-          <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Active Campaigns</h2>
-          <p style={{ color: 'var(--text-muted)' }}>Find a cause and help save a life today.</p>
+    <div className="fade-in">
+      <div className="container" style={{ padding: '4rem 0' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '4rem' }}>
+          <div>
+            <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--text-muted)' }}>Help Where it Matters</span>
+            <h2 style={{ fontSize: '3rem', fontWeight: 800, marginTop: '1rem', letterSpacing: '-0.02em' }}>Active Programs</h2>
+          </div>
+          <div style={{ position: 'relative', width: '340px' }}>
+            <input 
+              type="text" 
+              placeholder="Search programs..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{ 
+                width: '100%', 
+                padding: '1.25rem 1.5rem', 
+                borderRadius: 'var(--radius-full)', 
+                border: '1px solid var(--border)',
+                background: 'var(--surface)',
+                color: 'var(--text-main)',
+                fontSize: '0.9rem',
+                fontWeight: 500
+              }}
+            />
+          </div>
         </div>
-        <div style={{ position: 'relative', width: '300px' }}>
-          <input 
-            type="text" 
-            placeholder="Search campaigns..." 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ 
-              width: '100%', 
-              padding: '0.75rem 1rem', 
-              borderRadius: 'var(--radius-full)', 
-              border: '1px solid var(--border)',
-              background: 'var(--surface)',
-              color: 'var(--text-main)'
-            }}
-          />
-        </div>
+
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '6rem 0', fontSize: '1.25rem', color: 'var(--text-muted)' }}>Finding causes...</div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '3rem' }}>
+            {filtered.map(campaign => (
+              <div key={campaign.id} className="card" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', border: 'none', background: 'var(--surface)', borderBottom: '1px solid var(--border)', borderRadius: 0 }}>
+                <div style={{ background: '#F5F5F5', aspectRatio: '16/10', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '2rem', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#AAA', fontWeight: 700 }}>Program Visual</div>
+                </div>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', flex: 1, paddingBottom: '2rem' }}>
+                  <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-0.01em' }}>{campaign.title}</h3>
+                  <p style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '2rem', flex: 1, lineHeight: 1.6 }}>{campaign.description}</p>
+                  
+                  <div style={{ marginBottom: '2rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      <span>₦{campaign.current_amount.toLocaleString()} raised</span>
+                      <span style={{ color: 'var(--primary-dark)' }}>{Math.round((campaign.current_amount / campaign.goal_amount) * 100)}%</span>
+                    </div>
+                    <div style={{ height: '3px', background: '#E5E5E5', borderRadius: 'var(--radius-full)' }}>
+                      <div style={{ 
+                        height: '100%', 
+                        width: `${(campaign.current_amount / campaign.goal_amount) * 100}%`, 
+                        background: 'var(--secondary)',
+                        borderRadius: 'var(--radius-full)'
+                      }} />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>{campaign.donor_count} Supporters</span>
+                    <button className="btn btn-outline" style={{ padding: '0.6rem 1.5rem' }} onClick={() => onDonate(campaign.id)}>Support</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: '4rem' }}>Finding causes...</div>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '2rem' }}>
-          {filtered.map(campaign => (
-            <div key={campaign.id} className="glass" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ background: 'var(--surface)', borderRadius: 'var(--radius-md)', aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Campaign Image</span>
-              </div>
-              <h3 style={{ fontSize: '1.25rem' }}>{campaign.title}</h3>
-              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', flex: 1 }}>{campaign.description}</p>
-              
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: 600 }}>
-                  <span>₦{campaign.current_amount.toLocaleString()} raised</span>
-                  <span>{Math.round((campaign.current_amount / campaign.goal_amount) * 100)}%</span>
-                </div>
-                <div style={{ height: '8px', background: 'var(--surface)', borderRadius: 'var(--radius-full)', overflow: 'hidden' }}>
-                  <div style={{ 
-                    height: '100%', 
-                    width: `${(campaign.current_amount / campaign.goal_amount) * 100}%`, 
-                    background: 'var(--primary)',
-                    transition: 'width 1s ease-out'
-                  }} />
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>{campaign.donor_count} donors</span>
-                <button className="btn btn-primary" style={{ padding: '0.5rem 1rem' }} onClick={() => onDonate(campaign.id)}>Donate</button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

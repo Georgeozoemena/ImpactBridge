@@ -1,146 +1,171 @@
-import { useState } from 'react'
-import Landing from './components/Landing'
-import CampaignExplorer from './components/CampaignExplorer'
-import CampaignDetail from './components/CampaignDetail'
-import DonationModal from './components/DonationModal'
-import SuccessScreen from './components/SuccessScreen'
-import BeneficiaryDashboard from './components/BeneficiaryDashboard'
-import DonorDashboard from './components/DonorDashboard'
+import { useState } from 'react';
+import Landing from './components/Landing';
+import CampaignExplorer from './components/CampaignExplorer';
+import CampaignDetail from './components/CampaignDetail';
+import BeneficiaryDashboard from './components/BeneficiaryDashboard';
+import DonorDashboard from './components/DonorDashboard';
+import DonationModal from './components/DonationModal';
+import SuccessScreen from './components/SuccessScreen';
+import Auth from './components/Auth';
+import CreateCampaign from './components/CreateCampaign';
 
-function App() {
-  const [currentPage, setCurrentPage] = useState('landing')
-  const [activeCampaignId, setActiveCampaignId] = useState(null)
-  const [showDonationModal, setShowDonationModal] = useState(false)
-  const [lastDonationAmount, setLastDonationAmount] = useState(0)
-  const [isLogin, setIsLogin] = useState(true)
-  const [user, setUser] = useState(null)
+export default function App() {
+  const [currentPage, setCurrentPage] = useState('landing');
+  const [user, setUser] = useState(null);
+  const [activeCampaignId, setActiveCampaignId] = useState(null);
+  const [showDonationModal, setShowDonationModal] = useState(false);
+  const [lastDonationAmount, setLastDonationAmount] = useState(0);
 
-  const navigateTo = (page, params = {}) => {
-    if (params.id) setActiveCampaignId(params.id)
-    setCurrentPage(page)
-    window.scrollTo(0, 0)
-  }
+  const navigateTo = (page, campaignId = null) => {
+    if (page === 'auth' && user) {
+      setCurrentPage('dashboard');
+      return;
+    }
+    setCurrentPage(page);
+    setActiveCampaignId(campaignId);
+    window.scrollTo(0, 0);
+  };
 
-  const handleAuth = (role = 'donor') => {
-    setUser({ name: role === 'beneficiary' ? 'St. Nicholas Hospital' : 'John Donor', role })
-    navigateTo('landing')
-  }
+  const handleAuth = (userData) => {
+    setUser(userData);
+    if (userData.type === 'beneficiary') {
+      navigateTo('dashboard');
+    } else {
+      navigateTo('explorer');
+    }
+  };
+
+  const handleStartCampaign = () => {
+    if (!user) {
+      navigateTo('auth');
+    } else if (user.type === 'beneficiary') {
+      navigateTo('create-campaign');
+    } else {
+      alert('Your current account is a Donor account. Please logout and login as a Beneficiary to start a campaign.');
+    }
+  };
 
   const handleDonationSuccess = (amount) => {
-    setLastDonationAmount(amount)
-    setShowDonationModal(false)
-    navigateTo('success')
-  }
+    setLastDonationAmount(amount);
+    setShowDonationModal(false);
+    setCurrentPage('success');
+  };
 
   const renderPage = () => {
     switch(currentPage) {
-      case 'landing':
-        return <Landing 
-          onDonate={(id) => navigateTo(id ? 'campaign-detail' : 'explorer', { id })} 
-          onStartCampaign={() => handleAuth('beneficiary')} 
-        />
-      case 'explorer':
-        return <CampaignExplorer onDonate={(id) => navigateTo('campaign-detail', { id })} />
-      case 'campaign-detail':
-        return <CampaignDetail 
-          campaignId={activeCampaignId} 
-          onDonate={(amount) => {
-            setLastDonationAmount(amount || 0)
-            setShowDonationModal(true)
-          }} 
-        />
-      case 'success':
-        return <SuccessScreen amount={lastDonationAmount} onFinish={() => navigateTo('landing')} />
-      case 'dashboard':
-        return user?.role === 'beneficiary' ? <BeneficiaryDashboard /> : <DonorDashboard />
-      case 'auth':
-        return (
-          <main style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div className="glass fade-in" style={{ padding: '2.5rem', borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: '400px', boxShadow: 'var(--shadow-lg)' }}>
-              <h2 style={{ marginBottom: '0.5rem', textAlign: 'center' }}>{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
-              <form style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }} onSubmit={(e) => { e.preventDefault(); handleAuth(); }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                  <label style={{ fontSize: '0.875rem', fontWeight: 500 }}>Email Address</label>
-                  <input type="email" placeholder="john@example.com" className="form-input" required />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                  <label style={{ fontSize: '0.875rem', fontWeight: 500 }}>Password</label>
-                  <input type="password" placeholder="••••••••" className="form-input" required />
-                </div>
-                <button type="submit" className="btn btn-primary" style={{ marginTop: '0.5rem' }}>
-                  {isLogin ? 'Login' : 'Sign Up'}
-                </button>
-              </form>
-              <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.875rem' }}>
-                <span style={{ color: 'var(--text-muted)' }}>{isLogin ? "Don't have an account?" : "Already have an account?"}</span>
-                <button onClick={() => setIsLogin(!isLogin)} style={{ marginLeft: '0.5rem', color: 'var(--primary)', fontWeight: 600 }}>
-                  {isLogin ? 'Sign Up' : 'Login'}
-                </button>
-              </div>
-            </div>
-          </main>
-        )
-      default:
-        return <Landing 
-          onDonate={() => navigateTo('explorer')} 
-          onStartCampaign={() => navigateTo('auth')} 
-        />
+      case 'landing': return <Landing onDonate={() => navigateTo('explorer')} onStartCampaign={handleStartCampaign} />;
+      case 'explorer': return <CampaignExplorer onDonate={(id) => navigateTo('detail', id)} />;
+      case 'detail': return <CampaignDetail campaignId={activeCampaignId} onDonate={(amount) => {
+        if (amount) setLastDonationAmount(amount);
+        setShowDonationModal(true);
+      }} />;
+      case 'dashboard': return user?.type === 'beneficiary' ? <BeneficiaryDashboard /> : <DonorDashboard />;
+      case 'auth': return <Auth onAuth={handleAuth} onCancel={() => navigateTo('landing')} />;
+      case 'create-campaign': return <CreateCampaign onPublish={(campaign) => {
+        console.log('Campaign published:', campaign);
+        navigateTo('dashboard');
+      }} onCancel={() => navigateTo('dashboard')} />;
+      case 'success': return <SuccessScreen amount={lastDonationAmount} onFinish={() => navigateTo('landing')} />;
+      default: return <Landing onDonate={() => navigateTo('explorer')} onStartCampaign={handleStartCampaign} />;
     }
-  }
+  };
 
   return (
-    <div className="container">
-      <nav style={{ padding: '1.5rem 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 
-          style={{ color: 'var(--primary)', fontWeight: 800, cursor: 'pointer' }} 
-          onClick={() => navigateTo('landing')}
-        >
-          ImpactBridge
-        </h1>
-        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-          <button style={{ fontWeight: 500 }} onClick={() => navigateTo('explorer')}>Explore</button>
-          {!user ? (
-            <button className="btn btn-outline" onClick={() => navigateTo('auth')}>Login</button>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>Hi, {user.name}</span>
-              <button 
-                className="btn btn-primary" 
-                style={{ padding: '0.4rem 1rem' }}
-                onClick={() => navigateTo('dashboard')}
+    <div style={{ background: '#F5F5F3', minHeight: '100vh', padding: '1.5rem' }}>
+      <div className="canvas" style={{ minHeight: 'calc(100vh - 3rem)', display: 'flex', flexDirection: 'column' }}>
+        <header style={{ background: 'white', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, zIndex: 100 }}>
+          <div className="container">
+            <nav style={{ height: '90px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h1 
+                style={{ fontSize: '1.75rem', fontWeight: 800, cursor: 'pointer', letterSpacing: '-0.04em' }} 
+                onClick={() => navigateTo('landing')}
               >
-                Dashboard
-              </button>
-              <button 
-                style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}
-                onClick={() => { setUser(null); navigateTo('landing'); }}
-              >
-                Logout
-              </button>
+                Pure<span style={{ color: 'var(--primary-dark)' }}>Flow</span>
+              </h1>
+              
+              <div style={{ display: 'flex', gap: '3rem', alignItems: 'center', fontWeight: 700, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <button onClick={() => navigateTo('landing')}>About</button>
+                <button onClick={() => navigateTo('explorer')}>Programs</button>
+                <button onClick={() => navigateTo('explorer')}>Contact</button>
+                
+                {!user ? (
+                  <button onClick={() => navigateTo('auth')}>Login</button>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                    <div 
+                      style={{ cursor: 'pointer', fontWeight: 800, fontSize: '0.75rem', borderBottom: '2px solid var(--primary)' }}
+                      onClick={() => navigateTo('dashboard')}
+                    >
+                      {user.name.toUpperCase()}
+                    </div>
+                    <button 
+                      style={{ opacity: 0.6 }}
+                      onClick={() => { setUser(null); navigateTo('landing'); }}
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+                
+                <button className="btn btn-primary" onClick={() => navigateTo('explorer')}>Donate Now</button>
+              </div>
+            </nav>
+          </div>
+        </header>
+
+        <main style={{ flex: 1 }}>
+          {renderPage()}
+        </main>
+        
+        {showDonationModal && (
+          <DonationModal 
+            campaignId={activeCampaignId} 
+            amount={lastDonationAmount}
+            onClose={() => setShowDonationModal(false)}
+            onSuccess={handleDonationSuccess}
+          />
+        )}
+        
+        <footer style={{ padding: '6rem 0', borderTop: '1px solid var(--border)', background: 'white' }}>
+          <div className="container">
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: '4rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1.5rem' }}>PureFlow</h2>
+                <p style={{ color: 'var(--text-muted)', maxWidth: '300px' }}>
+                  Connecting compassion with critical healthcare needs. Every contribution moves the world closer to health equity.
+                </p>
+              </div>
+              <div>
+                <h4 style={{ fontWeight: 800, marginBottom: '1.5rem', textTransform: 'uppercase', fontSize: '0.75rem' }}>Organization</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                  <button style={{ textAlign: 'left' }} onClick={() => navigateTo('landing')}>About Us</button>
+                  <button style={{ textAlign: 'left' }} onClick={() => navigateTo('landing')}>Our Impact</button>
+                  <button style={{ textAlign: 'left' }} onClick={() => navigateTo('landing')}>Annual Reports</button>
+                </div>
+              </div>
+              <div>
+                <h4 style={{ fontWeight: 800, marginBottom: '1.5rem', textTransform: 'uppercase', fontSize: '0.75rem' }}>Programs</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                  <button style={{ textAlign: 'left' }} onClick={() => navigateTo('explorer')}>Health Clinics</button>
+                  <button style={{ textAlign: 'left' }} onClick={() => navigateTo('explorer')}>Emergency Surgery</button>
+                  <button style={{ textAlign: 'left' }} onClick={() => navigateTo('explorer')}>Oxygen Supply</button>
+                </div>
+              </div>
+              <div>
+                <h4 style={{ fontWeight: 800, marginBottom: '1.5rem', textTransform: 'uppercase', fontSize: '0.75rem' }}>Legal</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                  <button style={{ textAlign: 'left' }}>Privacy Policy</button>
+                  <button style={{ textAlign: 'left' }}>Terms of Service</button>
+                  <button style={{ textAlign: 'left' }}>Tax Receipts</button>
+                </div>
+              </div>
             </div>
-          )}
-          <button className="btn btn-ghost" onClick={() => document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')}>
-            🌙
-          </button>
-        </div>
-      </nav>
-
-      {renderPage()}
-      
-      {showDonationModal && (
-        <DonationModal 
-          campaignId={activeCampaignId} 
-          amount={lastDonationAmount}
-          onClose={() => setShowDonationModal(false)}
-          onSuccess={handleDonationSuccess}
-        />
-      )}
-      
-      <footer style={{ padding: '4rem 0', borderTop: '1px solid var(--border)', marginTop: '4rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-        © 2026 ImpactBridge • Helping Hospitals, One Payment at a Time.
-      </footer>
+          </div>
+        </footer>
+      </div>
+      <div style={{ textAlign: 'center', padding: '2rem', color: '#888', fontSize: '0.875rem' }}>
+        © {new Date().getFullYear()} PureFlow Impact. Compassion codified.
+      </div>
     </div>
-  )
+  );
 }
-
-export default App
