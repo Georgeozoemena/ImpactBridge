@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const Campaign = require("../models/Campaign");
 const { signToken } = require("./authController");
 
 const register = async (req, res, role) => {
@@ -19,6 +20,20 @@ const register = async (req, res, role) => {
     phone,
     role
   });
+
+  // If beneficiary, create their initial campaign
+  if (role === "beneficiary") {
+    const { campaignTitle, campaignDescription, campaignTarget } = req.body;
+    if (campaignTitle && campaignDescription && campaignTarget) {
+      await Campaign.create({
+        title: campaignTitle,
+        description: campaignDescription,
+        targetAmount: Number(campaignTarget),
+        createdBy: user._id,
+        imageUrl: `https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&q=80&w=800`
+      });
+    }
+  }
 
   const token = signToken(user);
   return res.ok(

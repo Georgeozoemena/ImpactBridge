@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { api } from '../services/api';
+import Notification from './Notification';
 
 export default function DonationModal({ campaignId, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
@@ -8,6 +9,8 @@ export default function DonationModal({ campaignId, onClose, onSuccess }) {
   const [email, setEmail] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [isMonthly, setIsMonthly] = useState(false);
+  const [successData, setSuccessData] = useState(null);
+  const [notification, setNotification] = useState(null);
 
   const quickAmounts = [1000, 5000, 10000];
 
@@ -27,19 +30,59 @@ export default function DonationModal({ campaignId, onClose, onSuccess }) {
         transactionReference: `IB-UI-${Date.now()}` // Mock ref for stub
       });
 
-      if (response) {
+      if (response && (response.donation || response.data?.donation)) {
+        const donation = response.donation || response.data.donation;
+        setSuccessData(donation);
         onSuccess(amount);
       }
     } catch (error) {
       console.error("Donation failed:", error);
-      alert(error.response?.data?.message || "Donation failed. Please try again.");
+      setNotification({ 
+        message: error.response?.data?.message || "Donation failed. Please try again.", 
+        type: 'error' 
+      });
     } finally {
       setLoading(false);
     }
   };
 
+  if (successData) {
+    return (
+      <div className="modal-overlay">
+        <div className="modal-content container fade-in" style={{ textAlign: 'center', padding: '5rem 2rem' }}>
+          <div style={{ fontSize: '5rem', marginBottom: '2rem' }}>🎉</div>
+          <h2 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '1.5rem' }}>Impact Confirmed.</h2>
+          <p style={{ color: 'var(--text-muted)', marginBottom: '4rem', fontSize: '1.25rem', lineHeight: 1.6 }}>
+            Thank you, <strong>{successData.donorName}</strong>. Your contribution of ₦{successData.amount.toLocaleString()} has been verified and credited to the campaign.
+          </p>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '400px', margin: '0 auto' }}>
+            <a 
+              href={`${api.getBaseUrl()}/donation/receipt/${successData._id}`} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="btn btn-primary"
+              style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}
+            >
+              <span>Download Receipt</span>
+              <span style={{ fontSize: '1.25rem' }}>↓</span>
+            </a>
+            <button onClick={onClose} className="btn btn-outline">Return to Campaign</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="modal-overlay">
+      {notification && (
+        <Notification 
+          message={notification.message} 
+          type={notification.type} 
+          onClose={() => setNotification(null)} 
+        />
+      )}
       <div className="modal-content container fade-in" style={{ textAlign: 'center', maxHeight: '90vh', overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'flex-end', position: 'absolute', top: '2rem', right: '2rem', zIndex: 10 }}>
           <button onClick={onClose} style={{ fontSize: '2rem', background: 'none', border: 'none', cursor: 'pointer', opacity: 0.5 }}>✕</button>

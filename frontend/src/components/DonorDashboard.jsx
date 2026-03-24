@@ -1,15 +1,25 @@
 import { useEffect, useState } from 'react';
+import { api } from '../services/api';
 
 export default function DonorDashboard() {
   const [impact, setImpact] = useState({ totalDonated: 0, livesTouched: 0, campaignsSupported: 0 });
   const [history, setHistory] = useState([]);
 
   useEffect(() => {
-    setImpact({ totalDonated: 45000, livesTouched: 3, campaignsSupported: 2 });
-    setHistory([
-      { id: 1, campaign: 'Emergency Surgery for Aisha', amount: 10000, date: 'Mar 20, 2026', status: 'verified' },
-      { id: 2, campaign: 'Hospital Oxygen Supply', amount: 35000, date: 'Mar 15, 2026', status: 'verified' },
-    ]);
+    const fetchHistory = async () => {
+      try {
+        const data = await api.getDonorHistory();
+        setImpact({
+          totalDonated: data.totalDonated,
+          livesTouched: data.livesTouched,
+          campaignsSupported: data.campaignsSupported
+        });
+        setHistory(data.history);
+      } catch (error) {
+        console.error("Failed to fetch donor history:", error);
+      }
+    };
+    fetchHistory();
   }, []);
 
   return (
@@ -41,13 +51,25 @@ export default function DonorDashboard() {
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               {history.map(h => (
                 <div key={h.id} style={{ padding: '1.5rem 0', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: '1.125rem' }}>{h.campaign}</div>
-                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{h.date} • <span style={{ color: 'var(--secondary)', fontWeight: 700 }}>{h.status}</span></div>
+                  <div style={{ flex: 1, paddingRight: '2rem' }}>
+                    <div style={{ fontWeight: 700, fontSize: '1.125rem', marginBottom: '0.25rem' }}>{h.campaign}</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>{new Date(h.date).toLocaleDateString()} • <span style={{ color: 'var(--secondary)', fontWeight: 700 }}>{h.status}</span></div>
+                    
+                    <div style={{ width: '100%', height: '4px', background: 'var(--border)', borderRadius: '100px', overflow: 'hidden', marginBottom: '0.5rem' }}>
+                      <div style={{ width: `${h.campaignProgress}%`, height: '100%', background: 'var(--primary)' }}></div>
+                    </div>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>Campaign Progress: {h.campaignProgress}%</div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontWeight: 800, fontSize: '1.25rem', marginBottom: '0.25rem' }}>₦{h.amount.toLocaleString()}</div>
-                    <button style={{ fontSize: '0.75rem', color: 'var(--text-main)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Receipt</button>
+                    <div style={{ fontWeight: 800, fontSize: '1.25rem', marginBottom: '0.5rem' }}>₦{h.amount.toLocaleString()}</div>
+                    <a 
+                      href={`${api.getBaseUrl()}/donation/receipt/${h._id}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', textDecoration: 'none' }}
+                    >
+                      Download Receipt
+                    </a>
                   </div>
                 </div>
               ))}

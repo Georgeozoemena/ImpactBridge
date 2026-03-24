@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { io } from 'socket.io-client';
 
-const API_BASE_URL = 'http://localhost:4000/api';
+const API_BASE_URL = 'https://impactbridge-rvzp.onrender.com/api';
 
 const apiInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -18,7 +19,33 @@ apiInstance.interceptors.request.use((config) => {
   return config;
 });
 
+let socket = null;
+
 export const api = {
+  getBaseUrl: () => API_BASE_URL,
+
+  connectSocket: (campaignId) => {
+    if (!socket) {
+      // Use the base URL but without /api
+      const socketUrl = API_BASE_URL.replace('/api', '');
+      socket = io(socketUrl, {
+        auth: { token: localStorage.getItem('token') }
+      });
+    }
+    if (campaignId) {
+      socket.emit('joinCampaign', campaignId);
+    }
+    return socket;
+  },
+
+  disconnectSocket: () => {
+    if (socket) {
+      socket.disconnect();
+      socket = null;
+    }
+  },
+
+  getSocket: () => socket,
   // Auth
   login: async (email, password) => {
     const response = await apiInstance.post('/auth/login', { email, password });
@@ -29,10 +56,8 @@ export const api = {
   },
 
   register: async (userData) => {
-    // Note: Backend has /api/beneficiary/register for beneficiaries
-    // If we want a general donor register, we might need to check if that exists
-    // For now, let's assume register is for beneficiaries as per our UI flow
-    const response = await apiInstance.post('/beneficiary/register', userData);
+    const endpoint = userData.role === 'beneficiary' ? '/beneficiary/register' : '/donor/register';
+    const response = await apiInstance.post(endpoint, userData);
     if (response.data.token) {
       localStorage.setItem('token', response.data.token);
     }
@@ -59,6 +84,16 @@ export const api = {
     return response.data;
   },
 
+  createCampaign: async (campaignData) => {
+    const response = await apiInstance.post('/campaign/create', campaignData);
+    return response.data;
+  },
+
+  updateCampaignStatus: async (id, status) => {
+    const response = await apiInstance.patch(`/campaign/${id}/status`, { status });
+    return response.data;
+  },
+
   // Donations
   initiateDonation: async (donationData) => {
     // Use initiate-test for now if we don't have real Paystack keys
@@ -68,6 +103,16 @@ export const api = {
 
   verifyDonation: async (reference) => {
     const response = await apiInstance.post('/donation/verify-test', { reference });
+    return response.data;
+  },
+
+  processDonation: async (donationData) => {
+    const response = await apiInstance.post('/donation/process', donationData);
+    return response.data;
+  },
+
+  getDonorHistory: async () => {
+    const response = await apiInstance.get('/donation/history');
     return response.data;
   }
 };

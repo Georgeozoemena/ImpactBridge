@@ -71,7 +71,7 @@ export default function App() {
       
       <Routes>
         <Route path="/" element={<Landing onDonate={openDonation} onStartCampaign={() => navigate('/auth')} />} />
-        <Route path="/campaign/:id" element={<CampaignDetail onDonate={() => setShowDonationFlow(true)} onBack={() => navigate('/')} />} />
+        <Route path="/campaign/:id" element={<CampaignDetail onDonate={(id) => openDonation(id)} onBack={() => navigate('/')} />} />
         <Route path="/dashboard" element={user ? <BeneficiaryDashboard user={user} onLogout={handleLogout} /> : <Navigate to="/auth" />} />
         <Route path="/auth" element={<Auth onAuth={handleAuth} onCancel={() => navigate('/')} />} />
         <Route path="/success" element={<SuccessScreen amount={lastDonationAmount} campaignTitle={successData.title} newPercent={successData.percent} onFinish={() => navigate('/')} />} />

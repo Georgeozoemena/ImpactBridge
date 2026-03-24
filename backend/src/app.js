@@ -11,6 +11,7 @@ const campaignRoutes = require("./routes/campaign");
 const donationRoutes = require("./routes/donation");
 const adminRoutes = require("./routes/admin");
 const response = require("./middleware/response");
+const mockData = require("./middleware/mockData");
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: false }));
 app.use(morgan("dev"));
 app.use(response);
+app.use(mockData);
 
 const windowMs = (Number(process.env.RATE_LIMIT_WINDOW_MIN) || 15) * 60 * 1000;
 const max = Number(process.env.RATE_LIMIT_MAX) || 100;

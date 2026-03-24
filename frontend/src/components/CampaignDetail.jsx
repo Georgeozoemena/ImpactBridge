@@ -10,7 +10,7 @@ export default function CampaignDetail({ onDonate }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchFullCampaign = async () => {
+    const fetchCampaign = async () => {
       try {
         setLoading(true);
         const [campaignData, donationsData] = await Promise.all([
@@ -21,7 +21,8 @@ export default function CampaignDetail({ onDonate }) {
         ]);
         
         // Correcting the fetch logic to use the real backend response
-        const data = await api.getCampaignById(id);
+        const responseData = await api.getCampaignById(id);
+        const data = responseData.campaign || responseData;
         setCampaign(data);
         
         // Fetch recent donations if endpoint exists
@@ -39,7 +40,32 @@ export default function CampaignDetail({ onDonate }) {
         setLoading(false);
       }
     };
-    fetchFullCampaign();
+    fetchCampaign();
+
+    // Socket integration for real-time updates
+    const socket = api.connectSocket(id);
+    
+    socket.on('campaignProgress', (data) => {
+      if (data.campaignId === id) {
+        setCampaign(prev => prev ? { ...prev, ...data } : null);
+      }
+    });
+
+    socket.on('donationReceived', (donation) => {
+      setCampaign(prev => {
+        if (!prev) return null;
+        const recentDonations = prev.recentDonations || [];
+        return {
+          ...prev,
+          recentDonations: [donation, ...recentDonations].slice(0, 10)
+        };
+      });
+    });
+
+    return () => {
+      socket.off('campaignProgress');
+      socket.off('donationReceived');
+    };
   }, [id]);
 
   if (loading) return (
@@ -55,13 +81,15 @@ export default function CampaignDetail({ onDonate }) {
     </div>
   );
 
-  const percent = Math.round((campaign.current_amount / campaign.goal_amount) * 100);
+  const raised = campaign.raisedAmount || campaign.current_amount || 0;
+  const target = campaign.targetAmount || campaign.goal_amount || 1;
+  const percent = Math.round((raised / target) * 100);
 
   return (
     <div className="fade-in">
       <div 
         className="hero-full" 
-        style={{ backgroundImage: `url(${campaign.image_url || 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=1200'})`, height: 'clamp(300px, 40vh, 500px)', alignItems: 'flex-end' }}
+        style={{ backgroundImage: `url(${campaign.imageUrl || campaign.image_url || 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=1200'})`, height: 'clamp(300px, 40vh, 500px)', alignItems: 'flex-end' }}
       >
         <div className="container" style={{ width: '100%', position: 'relative', zIndex: 2 }}>
           <button 
@@ -102,8 +130,8 @@ export default function CampaignDetail({ onDonate }) {
             <div style={{ background: 'white', padding: '4rem 3rem', border: '1px solid var(--border)', borderRadius: '4px' }}>
               <div style={{ marginBottom: '4rem' }}>
                 <span className="label-muted">Raised so far</span>
-                <div className="stat-value" style={{ color: 'var(--primary)', marginBottom: '1rem' }}>₦{campaign.current_amount.toLocaleString()}</div>
-                <div style={{ fontSize: '1.125rem', color: 'var(--text-muted)', fontWeight: 600 }}>Target: ₦{campaign.goal_amount.toLocaleString()}</div>
+                <div className="stat-value" style={{ color: 'var(--primary)', marginBottom: '1rem' }}>₦{raised.toLocaleString()}</div>
+                <div style={{ fontSize: '1.125rem', color: 'var(--text-muted)', fontWeight: 600 }}>Target: ₦{target.toLocaleString()}</div>
               </div>
 
               <div className="progress-bar-thin" style={{ marginBottom: '2rem', height: '6px' }}>
@@ -111,7 +139,7 @@ export default function CampaignDetail({ onDonate }) {
               </div>
               
               <div style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '4rem', color: 'var(--text-main)' }}>
-                 {campaign.donor_count || 0} supporters have joined
+                 {campaign.donorCount || campaign.donor_count || 0} supporters have joined
               </div>
 
               <button className="btn btn-primary btn-lg" style={{ width: '100%' }} onClick={() => onDonate(campaign._id || campaign.id)}>

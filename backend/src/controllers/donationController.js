@@ -223,4 +223,30 @@ const getReceipt = async (req, res) => {
   doc.end();
 };
 
-module.exports = { processDonation, initiateDonation, initiateDonationTest, verifyDonationTest, getReceipt };
+const getDonorHistory = async (req, res) => {
+  const donations = await Donation.find({ donorId: req.user._id, status: "verified" })
+    .sort({ createdAt: -1 })
+    .populate("campaignId", "title targetAmount raisedAmount status")
+    .lean();
+
+  const totalDonated = donations.reduce((sum, d) => sum + d.amount, 0);
+  const livesTouched = new Set(donations.map((d) => d.campaignId._id.toString())).size;
+  const campaignsSupported = livesTouched;
+
+  return res.ok({
+    totalDonated,
+    livesTouched,
+    campaignsSupported,
+    history: donations.map((d) => ({
+      _id: d._id,
+      campaign: d.campaignId ? d.campaignId.title : "Unknown Campaign",
+      campaignId: d.campaignId ? d.campaignId._id : null,
+      amount: d.amount,
+      date: d.createdAt,
+      status: d.status,
+      campaignProgress: d.campaignId ? Math.min(100, Math.round((d.campaignId.raisedAmount / d.campaignId.targetAmount) * 100)) : 0
+    }))
+  });
+};
+
+module.exports = { processDonation, initiateDonation, initiateDonationTest, verifyDonationTest, getReceipt, getDonorHistory };

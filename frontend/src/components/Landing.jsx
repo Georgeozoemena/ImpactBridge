@@ -17,8 +17,11 @@ export default function Landing({ onDonate, onStartCampaign }) {
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
-        const data = await api.getCampaigns();
-        setCampaigns(data);
+        const response = await api.getCampaigns();
+        // Handle both: local mock returning {campaigns: []} 
+        // and potential deployed backend structures
+        const campaignList = response.campaigns || response.data?.campaigns || (Array.isArray(response) ? response : []);
+        setCampaigns(campaignList);
       } catch (error) {
         console.error("Failed to fetch campaigns:", error);
       } finally {
@@ -26,6 +29,21 @@ export default function Landing({ onDonate, onStartCampaign }) {
       }
     };
     fetchCampaigns();
+
+    // Socket integration for real-time updates on all campaigns
+    const socket = api.connectSocket();
+    
+    socket.on('campaignProgress', (data) => {
+      setCampaigns(prev => prev.map(c => 
+        (c._id === data.campaignId || c.id === data.campaignId) 
+        ? { ...c, ...data } 
+        : c
+      ));
+    });
+
+    return () => {
+      socket.off('campaignProgress');
+    };
   }, []);
 
   useEffect(() => {
@@ -85,7 +103,7 @@ export default function Landing({ onDonate, onStartCampaign }) {
             ) : campaigns.map((camp) => (
               <div key={camp._id || camp.id} className="card-editorial" onClick={() => navigate(`/campaign/${camp._id || camp.id}`)} style={{ cursor: 'pointer' }}>
                 <div style={{ height: '300px', background: '#EEE', marginBottom: '2rem', borderRadius: '4px', overflow: 'hidden' }}>
-                  <img src={camp.image_url || `https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&q=80&w=800`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={camp.title} />
+                  <img src={camp.imageUrl || camp.image_url || `https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&q=80&w=800`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={camp.title} />
                 </div>
                 <div className="pill-urgency" style={{ marginBottom: '1.5rem' }}>{camp.urgency || 'Urgent'}</div>
                 <h3 style={{ fontSize: '1.75rem', marginBottom: '1rem', lineHeight: 1.2 }}>{camp.title}</h3>
@@ -94,11 +112,11 @@ export default function Landing({ onDonate, onStartCampaign }) {
                 </p>
                 
                 <div className="progress-bar-thin" style={{ height: '4px', marginBottom: '1.5rem' }}>
-                  <div className="progress-fill-thin" style={{ width: `${Math.min((camp.current_amount / camp.goal_amount) * 100, 100)}%`, height: '100%' }} />
+                  <div className="progress-fill-thin" style={{ width: `${Math.min(((camp.raisedAmount || camp.current_amount || 0) / (camp.targetAmount || camp.goal_amount || 1)) * 100, 100)}%`, height: '100%' }} />
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1rem', fontWeight: 800 }}>
-                  <span>₦{camp.current_amount.toLocaleString()}</span>
-                  <span style={{ color: 'var(--primary)' }}>{Math.round((camp.current_amount / camp.goal_amount) * 100)}%</span>
+                  <span>₦{(camp.raisedAmount || camp.current_amount || 0).toLocaleString()}</span>
+                  <span style={{ color: 'var(--primary)' }}>{Math.round(((camp.raisedAmount || camp.current_amount || 0) / (camp.targetAmount || camp.goal_amount || 1)) * 100)}%</span>
                 </div>
               </div>
             ))}
