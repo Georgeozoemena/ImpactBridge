@@ -2,42 +2,38 @@
 
 **Tagline:** Turn Payments Into Impact for Health Causes
 
-## What It Is
-ImpactBridge is a donation platform where beneficiaries (hospitals or patients) run goal‑based campaigns and donors contribute via Interswitch. The platform adds transparency, real‑time tracking, and verified receipts so every naira is tied to a real outcome.
+## The Heart of the Problem
+When a family is racing against time for life‑saving care, bank transfers don’t answer the questions that matter most:
+**Did the money arrive? How close are we to the goal? Who else has helped?**
 
-## The Problem
-Traditional bank transfers don’t provide:
-- Transparent, verified donation logs
-- Goal tracking with progress visibility
-- Receipts tied to specific campaigns
-- Real‑time updates that build urgency and trust
+ImpactBridge exists to replace uncertainty with clarity.
 
-## Our Solution
-ImpactBridge combines goal‑based fundraising with Interswitch payments to give donors confidence and beneficiaries a clear path to funding.
+## Project Statement
+ImpactBridge is a transparent, goal‑based donation platform that routes payments through Interswitch and shows progress in real time. Donors see verified contributions, beneficiaries see momentum, and every naira is tied to a specific health outcome.
 
-## Why This Beats Bank Transfers
-- **Direct transparency:** Verified donations logged in real‑time
-- **Goal tracking:** Progress bars motivate repeat giving
-- **Smart receipts:** PDF receipts tied to a campaign and donor
-- **Insights:** Forecasts and summaries build urgency
-- **Milestones:** 50%, 75%, 100% badges for engagement
+## Why It’s Different
+Bank transfers move money. ImpactBridge moves **trust**.
+- **Verified transparency:** every donation is logged in real time.
+- **Goal‑driven impact:** visible progress bars motivate follow‑through.
+- **Smart receipts:** PDF receipts linked to a specific campaign.
+- **Momentum signals:** live updates and milestones increase urgency.
+- **Accountability:** donors always know where their money went.
 
-## MVP Features
+## What We Built (MVP)
 - Beneficiary registration and campaign creation
-- Donor payment via Interswitch sandbox
+- Donor payments via Interswitch Quickteller Web Checkout
 - Beneficiary dashboard: progress, totals, donor count
-- Donor dashboard: contribution status, campaign progress
-- Real‑time updates when payments hit the backend
+- Donor dashboard: contribution status and campaign progress
+- Real‑time updates (Socket.IO)
 - Downloadable PDF receipts
 - Optional milestone badges and activity feed
 
 ## Demo Flow
-1. Beneficiary registers and creates a campaign
-2. Donor selects campaign and contributes via Interswitch
-3. Payment hits backend and updates in real‑time
-4. Dashboard shows progress and recent donations
+1. Beneficiary registers and launches a campaign
+2. Donor pays via Interswitch checkout
+3. Backend verifies and updates in real time
+4. Dashboard reflects progress and recent donors
 5. Donor downloads PDF receipt
-6. Optional: milestones unlock, feed updates
 
 ## Live Demo
 Backend base URL:
@@ -50,45 +46,41 @@ Health check:
 https://impactbridge-rvzp.onrender.com/health
 ```
 
+## Proof It Works
+Interswitch integration is live in sandbox:
+- Checkout page loads successfully
+- Callback returns `resp: "00"` (approved)
+- Requery confirms `responseCode: "00"`
+
 ## Architecture (High Level)
-- **Frontend:** Donor + Beneficiary dashboards
-- **Backend:** Node.js + Express API
-- **Payments:** Interswitch Quickteller Web Checkout
-- **Realtime:** Socket.IO events for live updates
-- **Storage:** MongoDB
-- **Receipts:** PDF generation
+- Frontend: Donor + Beneficiary dashboards
+- Backend: Node.js + Express API
+- Payments: Interswitch Quickteller Web Checkout
+- Realtime: Socket.IO
+- Storage: MongoDB
+- Receipts: PDF generation
 
-## Proof of Interswitch Integration
-- Live checkout page verified in sandbox
-- Callback returns `resp: "00"`
-- Requery verified with `responseCode: "00"`
-
-## Repo Structure
-- `backend/` API, payment integration, sockets, receipts
-- `frontend/` UI (donor + beneficiary)
+## Repository Map
+- `backend/` API, payments, sockets, receipts
+- `frontend/` UI
 - `render.yaml` Render deployment config
 
-## Quick Start (Judges)
-1. Review backend API docs:
-   - `backend/README.md`
-2. Import Postman collection:
-   - `backend/postman/ImpactBridge.postman_collection.json`
+## For Judges (Fast Review)
+1. API docs: `backend/README.md`
+2. Postman collection: `backend/postman/ImpactBridge.postman_collection.json`
 
-## 3‑Day Build Plan (Executed)
+## Build Timeline (Executed)
 **Day 1:** Backend + Interswitch integration  
 **Day 2:** Frontend dashboards  
-**Day 3:** PDF receipts, real‑time updates, demo polish
+**Day 3:** Realtime updates, receipts, demo polish
 
-## Roadmap (Post‑Hackathon)
-- Beneficiary KYC and verification
-- Donor analytics and milestones
-- Campaign updates and storytelling
-- Fraud monitoring and anomaly detection
-- Production Interswitch integration
-
-## Team
-- Product, Engineering, Design (2‑4 members)
+## Post‑Hackathon Roadmap
+- Beneficiary KYC + verification
+- Donor analytics and milestone engagement
+- Campaign storytelling + updates
+- Fraud and anomaly detection
+- Production Interswitch rollout
 
 ---
 
-ImpactBridge exists to make giving transparent, goal‑driven, and trustworthy.
+ImpactBridge makes giving **visible, verifiable, and goal‑driven** — exactly what health funding needs.
