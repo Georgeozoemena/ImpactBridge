@@ -9,12 +9,14 @@ const {
   listCampaigns,
   getProgress,
   recentDonations,
-  updateStatus
+  updateStatus,
+  getMyCampaign
 } = require("../controllers/campaignController");
 
 const router = express.Router();
 
 router.post("/create", auth, role("beneficiary"), asyncHandler(createCampaign));
+router.get("/me", auth, role("beneficiary"), asyncHandler(getMyCampaign));
 router.get("/", asyncHandler(listCampaigns));
 router.get("/:id/progress", requireValidId("id"), asyncHandler(getProgress));
 router.get("/:id/recent-donations", requireValidId("id"), asyncHandler(recentDonations));

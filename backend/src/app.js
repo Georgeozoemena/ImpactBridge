@@ -3,6 +3,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
+const path = require("path"); // Added path module
 
 const authRoutes = require("./routes/auth");
 const beneficiaryRoutes = require("./routes/beneficiary");
@@ -12,13 +13,14 @@ const donationRoutes = require("./routes/donation");
 const adminRoutes = require("./routes/admin");
 const response = require("./middleware/response");
 const mockData = require("./middleware/mockData");
+const { requestLogger, errorLogger } = require("./middleware/logger"); // Added logger imports
 
 const app = express();
 
 app.use(helmet());
 app.use(cors());
-app.use(express.json({ limit: "1mb" }));
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json()); // Modified: removed limit
+app.use(express.urlencoded({ extended: true })); // Modified: extended to true
 app.use(morgan("dev"));
 app.use(response);
 app.use(mockData);

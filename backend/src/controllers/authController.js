@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const Campaign = require("../models/Campaign");
 
 const signToken = (user) => {
   const payload = { id: user._id, role: user.role };
@@ -25,8 +26,20 @@ const login = async (req, res) => {
   }
 
   const token = signToken(user);
+  
+  let userCampaign = null;
+  if (user.role === "beneficiary") {
+    userCampaign = await Campaign.findOne({ createdBy: user._id }).sort({ createdAt: -1 });
+  }
+
   return res.ok({
-    user: { _id: user._id, name: user.name, role: user.role, email: user.email },
+    user: { 
+      _id: user._id, 
+      name: user.name, 
+      role: user.role, 
+      email: user.email,
+      campaign: userCampaign ? { _id: userCampaign._id, title: userCampaign.title } : null
+    },
     token
   });
 };

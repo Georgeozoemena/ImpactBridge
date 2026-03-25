@@ -2,7 +2,7 @@ const Campaign = require("../models/Campaign");
 const Donation = require("../models/Donation");
 
 const createCampaign = async (req, res) => {
-  const { title, description, targetAmount, deadline, imageUrl } = req.body;
+  const { title, description, targetAmount } = req.body;
   const numericTarget = Number(targetAmount);
   if (!title || !description || !numericTarget) {
     return res.fail("Title, description, and targetAmount are required", 400);
@@ -10,6 +10,7 @@ const createCampaign = async (req, res) => {
   if (numericTarget <= 0) {
     return res.fail("targetAmount must be greater than 0", 400);
   }
+  const { deadline } = req.body;
   if (deadline && Number.isNaN(Date.parse(deadline))) {
     return res.fail("Invalid deadline date", 400);
   }
@@ -19,7 +20,6 @@ const createCampaign = async (req, res) => {
     description,
     targetAmount: numericTarget,
     deadline,
-    imageUrl,
     createdBy: req.user._id
   });
 
@@ -123,11 +123,20 @@ const updateStatus = async (req, res) => {
   return res.ok({ campaign });
 };
 
+const getMyCampaign = async (req, res) => {
+  const campaign = await Campaign.findOne({ createdBy: req.user._id }).sort({ createdAt: -1 });
+  if (!campaign) {
+    return res.ok({ campaign: null });
+  }
+  return res.ok({ campaign });
+};
+
 module.exports = {
   createCampaign,
   getCampaign,
   listCampaigns,
   getProgress,
   recentDonations,
-  updateStatus
+  updateStatus,
+  getMyCampaign
 };

@@ -3,10 +3,14 @@ import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-
 import Landing from './components/Landing';
 import CampaignDetail from './components/CampaignDetail';
 import BeneficiaryDashboard from './components/BeneficiaryDashboard';
+import DonorDashboard from './components/DonorDashboard';
+import About from './components/About';
+import Transparency from './components/Transparency';
 import DonationModal from './components/DonationModal';
 import SuccessScreen from './components/SuccessScreen';
 import Auth from './components/Auth';
 import Navbar from './components/Navbar';
+import PaymentCallback from './components/PaymentCallback';
 import { api } from './services/api';
 
 export default function App() {
@@ -72,9 +76,22 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Landing onDonate={openDonation} onStartCampaign={() => navigate('/auth')} />} />
         <Route path="/campaign/:id" element={<CampaignDetail onDonate={(id) => openDonation(id)} onBack={() => navigate('/')} />} />
-        <Route path="/dashboard" element={user ? <BeneficiaryDashboard user={user} onLogout={handleLogout} /> : <Navigate to="/auth" />} />
+        <Route path="/dashboard" element={
+          user ? (
+            user.role === 'beneficiary' ? (
+              <BeneficiaryDashboard user={user} onLogout={handleLogout} />
+            ) : (
+              <DonorDashboard user={user} onLogout={handleLogout} />
+            )
+          ) : (
+            <Navigate to="/auth" />
+          )
+        } />
+        <Route path="/about" element={<About />} />
+        <Route path="/transparency" element={<Transparency />} />
         <Route path="/auth" element={<Auth onAuth={handleAuth} onCancel={() => navigate('/')} />} />
         <Route path="/success" element={<SuccessScreen amount={lastDonationAmount} campaignTitle={successData.title} newPercent={successData.percent} onFinish={() => navigate('/')} />} />
+        <Route path="/payment/callback" element={<PaymentCallback />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
       

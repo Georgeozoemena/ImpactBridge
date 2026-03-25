@@ -6,7 +6,7 @@ export default function CreateCampaign({ onPublish, onCancel }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [goal, setGoal] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
+  const [deadline, setDeadline] = useState('');
   const [notification, setNotification] = useState(null);
 
   const handleSubmit = async (e) => {
@@ -16,7 +16,7 @@ export default function CreateCampaign({ onPublish, onCancel }) {
         title,
         description,
         targetAmount: Number(goal),
-        imageUrl: imageUrl || `https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&q=80&w=800`
+        deadline
       };
       const response = await api.createCampaign(campaignData);
       setNotification({ message: 'Campaign published successfully!', type: 'success' });
@@ -68,17 +68,6 @@ export default function CreateCampaign({ onPublish, onCancel }) {
               </div>
 
                <div>
-                 <label style={{ fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '1rem', display: 'block' }}>Campaign Image URL</label>
-                 <input 
-                   type="url" 
-                   placeholder="https://images.unsplash.com/..."
-                   style={{ width: '100%', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--surface)', fontSize: '1.125rem' }}
-                   value={imageUrl}
-                   onChange={(e) => setImageUrl(e.target.value)}
-                 />
-               </div>
-
-               <div>
                  <label style={{ fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '1rem', display: 'block' }}>The Narrative</label>
                 <textarea 
                   placeholder="Describe the medical situation and why these funds are critical..."
@@ -87,6 +76,16 @@ export default function CreateCampaign({ onPublish, onCancel }) {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   required
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '1rem', display: 'block' }}>Campaign Deadline (Optional)</label>
+                <input 
+                  type="date" 
+                  style={{ width: '100%', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', background: 'var(--surface)', fontSize: '1.25rem', fontWeight: 600 }}
+                  value={deadline}
+                  onChange={(e) => setDeadline(e.target.value)}
                 />
               </div>
 

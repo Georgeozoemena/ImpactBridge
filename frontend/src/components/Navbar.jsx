@@ -12,8 +12,8 @@ export default function Navbar({ onNavigate, user }) {
 
         <div className="nav-links">
           <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('/'); }}>Campaigns</a>
-          <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('/'); }}>Transparency</a>
-          <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('/'); }}>About</a>
+          <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('/transparency'); }}>Transparency</a>
+          <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('/about'); }}>About</a>
           
           <div className="nav-actions">
             {!user ? (
@@ -70,8 +70,8 @@ export default function Navbar({ onNavigate, user }) {
           animation: 'fadeIn 0.3s ease-out'
         }}>
           <a href="#" className="nav-link" onClick={() => { onNavigate('/'); setIsMenuOpen(false); }}>Campaigns</a>
-          <a href="#" className="nav-link" onClick={() => { onNavigate('/'); setIsMenuOpen(false); }}>Transparency</a>
-          <a href="#" className="nav-link" onClick={() => { onNavigate('/'); setIsMenuOpen(false); }}>About</a>
+          <a href="#" className="nav-link" onClick={() => { onNavigate('/transparency'); setIsMenuOpen(false); }}>Transparency</a>
+          <a href="#" className="nav-link" onClick={() => { onNavigate('/about'); setIsMenuOpen(false); }}>About</a>
           <hr style={{ border: 'none', borderTop: '1px solid var(--border)' }} />
           {!user ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

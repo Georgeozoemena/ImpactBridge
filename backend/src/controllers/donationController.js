@@ -6,12 +6,13 @@ const { verifyPayment, buildPaymentRequest } = require("../services/interswitch"
 const { getIo } = require("../socket");
 
 const processDonation = async (req, res) => {
-  const { campaignId, amount, paymentMethod, transactionReference } = req.body;
-  const donorName = req.body.donorName || req.user.name;
+  const { campaignId, amount, paymentMethod, transactionReference, donorName: bodyDonorName } = req.body;
+  const donorName = bodyDonorName || (req.user && req.user.name);
   const numericAmount = Number(amount);
-  if (!campaignId || !numericAmount || !donorName) {
-    return res.fail("campaignId, amount, and donorName are required", 400);
-  }
+
+  if (!campaignId) return res.fail("campaignId is required", 400);
+  if (!numericAmount) return res.fail("amount must be a valid number", 400);
+  if (!donorName) return res.fail("donorName is required (log in or provide name)", 400);
   if (numericAmount <= 0) {
     return res.fail("amount must be greater than 0", 400);
   }

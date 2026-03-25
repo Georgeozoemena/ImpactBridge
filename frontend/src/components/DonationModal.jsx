@@ -1,65 +1,357 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import Notification from './Notification';
 
 export default function DonationModal({ campaignId, onClose, onSuccess }) {
+  const [stage, setStage] = useState('form'); // 'form', 'payment', 'processing', 'success'
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState(5000);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
-  const [isMonthly, setIsMonthly] = useState(false);
-  const [successData, setSuccessData] = useState(null);
   const [notification, setNotification] = useState(null);
+  const [interswitchData, setInterswitchData] = useState(null);
+  const [successData, setSuccessData] = useState(null);
 
-  const quickAmounts = [1000, 5000, 10000];
+  const quickAmounts = [1000, 5000, 10000, 50000];
 
-  const handleDonate = async () => {
-    if (!amount || amount <= 0) return;
-    
+  /**
+   * Step 1: Initiate donation - Get Interswitch form fields from backend
+   */
+  const handleInitiateDonation = async () => {
+    if (!amount || amount <= 0) {
+      setNotification({ message: 'Please enter a valid amount', type: 'error' });
+      return;
+    }
+
+    if (!email || !email.includes('@')) {
+      setNotification({ message: 'Please enter a valid email', type: 'error' });
+      return;
+    }
+
     setLoading(true);
     try {
-      // We'll use processDonation directly for this demo sync 
-      // as it handles the verification (stubbed or real) in the backend
-      const response = await api.processDonation({
+      const response = await api.initiateDonation(
         campaignId,
         amount,
-        donorName: isAnonymous ? 'Anonymous' : name,
-        donorEmail: email || 'donor@example.com', // Fallback for demo
-        paymentMethod: 'interswitch',
-        transactionReference: `IB-UI-${Date.now()}` // Mock ref for stub
-      });
+        `${window.location.origin}/payment/callback`,
+        email
+      );
 
-      if (response && (response.donation || response.data?.donation)) {
-        const donation = response.donation || response.data.donation;
-        setSuccessData(donation);
-        onSuccess(amount);
+      if (response.success && response.fields) {
+        // Store Interswitch data for processing later
+        setInterswitchData({
+          paymentUrl: response.paymentUrl,
+          fields: response.fields,
+          transactionReference: response.transactionReference,
+          donationId: response.donationId
+        });
+        setStage('payment');
+      } else {
+        throw new Error('Failed to initiate payment');
       }
-    } catch (error) {
-      console.error("Donation failed:", error);
-      setNotification({ 
-        message: error.response?.data?.message || "Donation failed. Please try again.", 
-        type: 'error' 
+    } catch (err) {
+      console.error('Donation initiation failed:', err);
+      setNotification({
+        message: err.response?.data?.message || 'Payment initiation failed. Please try again.',
+        type: 'error'
       });
     } finally {
       setLoading(false);
     }
   };
 
-  if (successData) {
+  /**
+   * Step 2: Submit Interswitch form
+   * In a real scenario, this would submit to Interswitch
+   * For now, we'll process directly (simulating returned transaction reference)
+   */
+  const handleSubmitPayment = async () => {
+    if (!interswitchData) return;
+
+    setLoading(true);
+    setStage('processing');
+
+    try {
+      // In production: user would be redirected to Interswitch,
+      // and after payment, callback handler would process donation
+      // For MVP/demo with INTERSWITCH_STUB=true on backend:
+      const response = await api.processDonation(
+        campaignId,
+        amount,
+        isAnonymous ? 'Anonymous' : name,
+        interswitchData.transactionReference
+      );
+
+      if (response.success && response.donation) {
+        setSuccessData(response.donation);
+        setStage('success');
+        // Notify parent and redirect after brief delay
+        setTimeout(() => onSuccess(amount), 2000);
+      } else {
+        throw new Error('Payment verification failed');
+      }
+    } catch (err) {
+      console.error('Payment processing failed:', err);
+      setNotification({
+        message: err.response?.data?.message || 'Payment verification failed. Please try again.',
+        type: 'error'
+      });
+      setStage('payment');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ============= Form Stage =============
+  if (stage === 'form') {
+    return (
+      <div className="modal-overlay">
+        {notification && (
+          <Notification message={notification.message} type={notification.type} onClose={() => setNotification(null)} />
+        )}
+        <div className="modal-content container fade-in" style={{ textAlign: 'center', maxHeight: '90vh', overflowY: 'auto' }}>
+          {/* Close Button */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', position: 'absolute', top: '2rem', right: '2rem', zIndex: 10 }}>
+            <button
+              onClick={onClose}
+              style={{
+                fontSize: '2rem',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                opacity: 0.5
+              }}
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Title */}
+          <h2
+            style={{
+              fontSize: 'clamp(2rem, 5vw, 3rem)',
+              fontWeight: 900,
+              marginBottom: '1rem',
+              lineHeight: 1,
+              marginTop: '2rem'
+            }}
+          >
+            Choose your impact
+          </h2>
+          <p style={{ color: 'var(--text-muted)', marginBottom: '5rem', fontSize: '1.25rem' }}>
+            Every naira moves this patient closer to recovery
+          </p>
+
+          {/* Quick Amount Buttons */}
+          <div
+            className="amount-grid"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+              gap: '1.5rem',
+              width: '100%',
+              maxWidth: '500px',
+              margin: '0 auto 5rem'
+            }}
+          >
+            {quickAmounts.map((val) => (
+              <button
+                key={val}
+                onClick={() => setAmount(val)}
+                style={{
+                  padding: '1.5rem',
+                  borderRadius: '100px',
+                  border: amount === val ? 'none' : '1.5px solid var(--border)',
+                  background: amount === val ? 'var(--primary)' : 'white',
+                  color: amount === val ? 'white' : 'var(--text-main)',
+                  fontWeight: 800,
+                  fontSize: '1.1rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                ₦{val.toLocaleString()}
+              </button>
+            ))}
+          </div>
+
+          {/* Custom Amount */}
+          <div style={{ marginBottom: '5rem', maxWidth: '500px', margin: '0 auto 5rem' }}>
+            <span className="label-muted" style={{ textAlign: 'center', display: 'block', marginBottom: '1rem' }}>
+              Custom Amount (₦)
+            </span>
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(Number(e.target.value))}
+              placeholder="0"
+              style={{
+                width: '100%',
+                padding: '1.5rem 0',
+                border: 'none',
+                borderBottom: '2px solid var(--border)',
+                fontSize: '4rem',
+                fontWeight: 900,
+                fontFamily: 'var(--font-display)',
+                outline: 'none',
+                textAlign: 'center',
+                background: 'transparent'
+              }}
+            />
+          </div>
+
+          {/* Donor Details */}
+          <div style={{ marginBottom: '6rem', maxWidth: '500px', margin: '0 auto 6rem', textAlign: 'left' }}>
+            <div style={{ marginBottom: '2.5rem' }}>
+              <span className="label-muted">Your Name</span>
+              <input
+                type="text"
+                placeholder="John Doe"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={isAnonymous}
+                style={{
+                  width: '100%',
+                  padding: '1.5rem 0',
+                  border: 'none',
+                  borderBottom: '1px solid var(--border)',
+                  fontSize: '1.25rem',
+                  outline: 'none',
+                  opacity: isAnonymous ? 0.3 : 1,
+                  fontWeight: 700,
+                  background: 'transparent'
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '2.5rem' }}>
+              <span className="label-muted">Email Address</span>
+              <input
+                type="email"
+                placeholder="john@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '1.5rem 0',
+                  border: 'none',
+                  borderBottom: '1px solid var(--border)',
+                  fontSize: '1.25rem',
+                  outline: 'none',
+                  fontWeight: 700,
+                  background: 'transparent'
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <input
+                type="checkbox"
+                id="anon"
+                checked={isAnonymous}
+                onChange={(e) => setIsAnonymous(e.target.checked)}
+                style={{ width: '24px', height: '24px', accentColor: 'var(--primary)' }}
+              />
+              <label htmlFor="anon" style={{ fontSize: '1.1rem', fontWeight: 700 }}>
+                Donate anonymously
+              </label>
+            </div>
+          </div>
+
+          {/* Continue to Payment Button */}
+          <button
+            className="btn btn-primary btn-lg"
+            disabled={loading || !amount || !email}
+            onClick={handleInitiateDonation}
+            style={{ width: '100%', maxWidth: '500px' }}
+          >
+            {loading ? 'Connecting to Interswitch...' : 'Continue to Payment'}
+          </button>
+
+          <p
+            style={{
+              textAlign: 'center',
+              fontSize: '0.9rem',
+              color: 'var(--text-muted)',
+              marginTop: '3rem',
+              fontWeight: 600,
+              paddingBottom: '2rem'
+            }}
+          >
+            🔒 Secured & verified · Interswitch
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // ============= Payment Stage =============
+  if (stage === 'payment') {
+    return (
+      <div className="modal-overlay">
+        <div className="modal-content container fade-in" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+          <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem' }}>Ready to save a life?</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: '3rem' }}>
+            Amount: <strong>₦{amount.toLocaleString()}</strong>
+          </p>
+
+          <button
+            className="btn btn-primary btn-lg"
+            disabled={loading}
+            onClick={handleSubmitPayment}
+            style={{ width: '100%', maxWidth: '500px', marginBottom: '1rem' }}
+          >
+            {loading ? 'Processing...' : 'Complete Payment'}
+          </button>
+
+          <button
+            className="btn btn-outline"
+            onClick={() => setStage('form')}
+            style={{ width: '100%', maxWidth: '500px' }}
+          >
+            Back to Details
+          </button>
+
+          <p style={{ marginTop: '2rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+            In production, you would be redirected to Interswitch Quickteller for secure payment.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // ============= Processing Stage =============
+  if (stage === 'processing') {
+    return (
+      <div className="modal-overlay">
+        <div className="modal-content container fade-in" style={{ textAlign: 'center', padding: '5rem 2rem' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '2rem', animation: 'pulse 1.5s ease-in-out infinite' }}>⏳</div>
+          <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem' }}>Verifying payment...</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>
+            Please wait while we confirm your transaction with Interswitch
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // ============= Success Stage =============
+  if (stage === 'success' && successData) {
     return (
       <div className="modal-overlay">
         <div className="modal-content container fade-in" style={{ textAlign: 'center', padding: '5rem 2rem' }}>
           <div style={{ fontSize: '5rem', marginBottom: '2rem' }}>🎉</div>
           <h2 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '1.5rem' }}>Impact Confirmed.</h2>
           <p style={{ color: 'var(--text-muted)', marginBottom: '4rem', fontSize: '1.25rem', lineHeight: 1.6 }}>
-            Thank you, <strong>{successData.donorName}</strong>. Your contribution of ₦{successData.amount.toLocaleString()} has been verified and credited to the campaign.
+            Thank you, <strong>{successData.donorName || 'Donor'}</strong>. Your contribution of ₦{successData.amount?.toLocaleString()} has
+            been verified and credited to the campaign.
           </p>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '400px', margin: '0 auto' }}>
-            <a 
-              href={`${api.getBaseUrl()}/donation/receipt/${successData._id}`} 
-              target="_blank" 
+            <a
+              href={api.getReceiptUrl(successData._id)}
+              target="_blank"
               rel="noopener noreferrer"
               className="btn btn-primary"
               style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}
@@ -67,127 +359,14 @@ export default function DonationModal({ campaignId, onClose, onSuccess }) {
               <span>Download Receipt</span>
               <span style={{ fontSize: '1.25rem' }}>↓</span>
             </a>
-            <button onClick={onClose} className="btn btn-outline">Return to Campaign</button>
+            <button onClick={onClose} className="btn btn-outline">
+              Return to Campaign
+            </button>
           </div>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="modal-overlay">
-      {notification && (
-        <Notification 
-          message={notification.message} 
-          type={notification.type} 
-          onClose={() => setNotification(null)} 
-        />
-      )}
-      <div className="modal-content container fade-in" style={{ textAlign: 'center', maxHeight: '90vh', overflowY: 'auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', position: 'absolute', top: '2rem', right: '2rem', zIndex: 10 }}>
-          <button onClick={onClose} style={{ fontSize: '2rem', background: 'none', border: 'none', cursor: 'pointer', opacity: 0.5 }}>✕</button>
-        </div>
-        
-        <div className="toggle-reveal" style={{ marginBottom: '4rem', marginTop: '2rem' }}>
-          <div 
-            className={`toggle-option ${!isMonthly ? 'active' : ''}`} 
-            onClick={() => setIsMonthly(false)}
-          >
-            One-Time
-          </div>
-          <div 
-            className={`toggle-option ${isMonthly ? 'active' : ''}`} 
-            onClick={() => setIsMonthly(true)}
-          >
-            Monthly
-          </div>
-        </div>
-
-        <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 900, marginBottom: '1rem', lineHeight: 1 }}>Choose your amount</h2>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '5rem', fontSize: '1.25rem' }}>Every naira moves the patient closer to surgery</p>
-
-        <div className="amount-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1.5rem', width: '100%', maxWidth: '500px', margin: '0 auto 5rem' }}>
-          {quickAmounts.map(val => (
-            <button 
-              key={val}
-              onClick={() => setAmount(val)}
-              style={{ 
-                padding: '1.5rem', 
-                borderRadius: '100px', 
-                border: amount === val ? 'none' : '1.5px solid var(--border)',
-                background: amount === val ? 'var(--primary)' : 'white',
-                color: amount === val ? 'white' : 'var(--text-main)',
-                fontWeight: 800,
-                fontSize: '1.1rem',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              ₦{val.toLocaleString()}
-            </button>
-          ))}
-        </div>
-
-        <div style={{ marginBottom: '5rem', maxWidth: '500px', margin: '0 auto 5rem' }}>
-          <span className="label-muted" style={{ textAlign: 'center' }}>Custom Amount (₦)</span>
-          <input 
-            type="number" 
-            value={amount}
-            onChange={(e) => setAmount(Number(e.target.value))}
-            placeholder="0"
-            style={{ width: '100%', padding: '1.5rem 0', border: 'none', borderBottom: '2px solid var(--border)', fontSize: '4rem', fontWeight: 900, fontFamily: 'var(--font-display)', outline: 'none', textAlign: 'center', background: 'transparent' }}
-          />
-        </div>
-
-        <div style={{ marginBottom: '6rem', maxWidth: '500px', margin: '0 auto 6rem', textAlign: 'left' }}>
-          <div style={{ marginBottom: '2.5rem' }}>
-            <span className="label-muted">Your Name</span>
-            <input 
-              type="text" 
-              placeholder="John Doe"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              disabled={isAnonymous}
-              style={{ width: '100%', padding: '1.5rem 0', border: 'none', borderBottom: '1px solid var(--border)', fontSize: '1.25rem', outline: 'none', opacity: isAnonymous ? 0.3 : 1, fontWeight: 700, background: 'transparent' }}
-            />
-          </div>
-          
-          <div style={{ marginBottom: '2.5rem' }}>
-            <span className="label-muted">Email Address</span>
-            <input 
-              type="email" 
-              placeholder="john@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={{ width: '100%', padding: '1.5rem 0', border: 'none', borderBottom: '1px solid var(--border)', fontSize: '1.25rem', outline: 'none', fontWeight: 700, background: 'transparent' }}
-            />
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <input 
-              type="checkbox" 
-              id="anon" 
-              checked={isAnonymous} 
-              onChange={(e) => setIsAnonymous(e.target.checked)}
-              style={{ width: '24px', height: '24px', accentColor: 'var(--primary)' }}
-            />
-            <label htmlFor="anon" style={{ fontSize: '1.1rem', fontWeight: 700 }}>Donate anonymously</label>
-          </div>
-        </div>
-
-        <button 
-          className="btn btn-primary btn-lg" 
-          disabled={loading || !amount}
-          onClick={handleDonate}
-          style={{ width: '100%', maxWidth: '500px' }}
-        >
-          {loading ? 'Verifying with Interswitch...' : 'Save a Life Now'}
-        </button>
-        
-        <p style={{ textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-muted)', marginTop: '3rem', fontWeight: 600, paddingBottom: '2rem' }}>
-          🔒 Secured & verified · Interswitch
-        </p>
-      </div>
-    </div>
-  );
+  return null;
 }

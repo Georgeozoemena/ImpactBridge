@@ -103,21 +103,48 @@ export default function Landing({ onDonate, onStartCampaign }) {
             ) : campaigns.map((camp) => (
               <div key={camp._id || camp.id} className="card-editorial" onClick={() => navigate(`/campaign/${camp._id || camp.id}`)} style={{ cursor: 'pointer' }}>
                 <div style={{ height: '300px', background: '#EEE', marginBottom: '2rem', borderRadius: '4px', overflow: 'hidden' }}>
-                  <img src={camp.imageUrl || camp.image_url || `https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&q=80&w=800`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={camp.title} />
+                  <img 
+                    src={`https://picsum.photos/seed/${camp._id || camp.id}/800/600`} 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                    alt={camp.title} 
+                  />
                 </div>
                 <div className="pill-urgency" style={{ marginBottom: '1.5rem' }}>{camp.urgency || 'Urgent'}</div>
                 <h3 style={{ fontSize: '1.75rem', marginBottom: '1rem', lineHeight: 1.2 }}>{camp.title}</h3>
-                <p style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '2.5rem', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                  {camp.description}
-                </p>
                 
-                <div className="progress-bar-thin" style={{ height: '4px', marginBottom: '1.5rem' }}>
-                  <div className="progress-fill-thin" style={{ width: `${Math.min(((camp.raisedAmount || camp.current_amount || 0) / (camp.targetAmount || camp.goal_amount || 1)) * 100, 100)}%`, height: '100%' }} />
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--primary)' }}>The Narrative</span>
+                  <p style={{ fontSize: '1rem', color: 'var(--text-muted)', marginTop: '0.5rem', marginBottom: '0', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    {camp.description}
+                  </p>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1rem', fontWeight: 800 }}>
-                  <span>₦{(camp.raisedAmount || camp.current_amount || 0).toLocaleString()}</span>
-                  <span style={{ color: 'var(--primary)' }}>{Math.round(((camp.raisedAmount || camp.current_amount || 0) / (camp.targetAmount || camp.goal_amount || 1)) * 100)}%</span>
+
+                <div style={{ marginBottom: '2rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 700 }}>
+                    <span>Goal: ₦{(camp.targetAmount || camp.goal_amount || 0).toLocaleString()}</span>
+                    {camp.deadline && (
+                      <span style={{ color: 'var(--text-muted)' }}>Ends: {new Date(camp.deadline).toLocaleDateString()}</span>
+                    )}
+                  </div>
+                  <div className="progress-bar-thin" style={{ height: '4px', marginBottom: '1rem' }}>
+                    <div className="progress-fill-thin" style={{ width: `${Math.min(((camp.raisedAmount || camp.current_amount || 0) / (camp.targetAmount || camp.goal_amount || 1)) * 100, 100)}%`, height: '100%' }} />
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.1rem', fontWeight: 800 }}>
+                    <span>₦{(camp.raisedAmount || camp.current_amount || 0).toLocaleString()} raised</span>
+                    <span style={{ color: 'var(--primary)' }}>{Math.round(((camp.raisedAmount || camp.current_amount || 0) / (camp.targetAmount || camp.goal_amount || 1)) * 100)}%</span>
+                  </div>
                 </div>
+
+                <button 
+                  className="btn btn-primary" 
+                  style={{ width: '100%', padding: '1rem' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDonate(camp._id || camp.id);
+                  }}
+                >
+                  Donate to this Cause
+                </button>
               </div>
             ))}
           </div>

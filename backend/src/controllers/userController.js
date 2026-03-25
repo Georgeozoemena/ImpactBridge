@@ -25,20 +25,27 @@ const register = async (req, res, role) => {
   if (role === "beneficiary") {
     const { campaignTitle, campaignDescription, campaignTarget } = req.body;
     if (campaignTitle && campaignDescription && campaignTarget) {
-      await Campaign.create({
+      const campaign = await Campaign.create({
         title: campaignTitle,
         description: campaignDescription,
         targetAmount: Number(campaignTarget),
-        createdBy: user._id,
-        imageUrl: `https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&q=80&w=800`
+        createdBy: user._id
       });
+      // Attach to user object for the response
+      user.campaign = campaign;
     }
   }
 
   const token = signToken(user);
   return res.ok(
     {
-      user: { _id: user._id, name: user.name, email: user.email, role: user.role },
+      user: { 
+        _id: user._id, 
+        name: user.name, 
+        email: user.email, 
+        role: user.role,
+        campaign: user.campaign ? { _id: user.campaign._id, title: user.campaign.title } : null
+      },
       token
     },
     201
