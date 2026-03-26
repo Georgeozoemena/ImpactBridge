@@ -3,7 +3,6 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
-const path = require("path"); // Added path module
 
 const authRoutes = require("./routes/auth");
 const beneficiaryRoutes = require("./routes/beneficiary");
@@ -13,7 +12,6 @@ const donationRoutes = require("./routes/donation");
 const adminRoutes = require("./routes/admin");
 const response = require("./middleware/response");
 const mockData = require("./middleware/mockData");
-const { requestLogger, errorLogger } = require("./middleware/logger"); // Added logger imports
 
 const app = express();
 
