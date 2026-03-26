@@ -54,6 +54,10 @@ const processDonation = async (req, res) => {
   campaign.raisedAmount += numericAmount;
   campaign.donorCount += 1;
   await campaign.save();
+  const percentComplete = Math.min(
+    100,
+    Math.round((campaign.raisedAmount / campaign.targetAmount) * 100)
+  );
 
   let io;
   try {
@@ -93,8 +97,10 @@ const processDonation = async (req, res) => {
     },
     updatedCampaign: {
       raisedAmount: campaign.raisedAmount,
-      donorCount: campaign.donorCount
-    }
+      donorCount: campaign.donorCount,
+      percentComplete
+    },
+    newPercent: percentComplete
   });
 };
 
