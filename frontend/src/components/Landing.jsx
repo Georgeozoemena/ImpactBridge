@@ -193,8 +193,11 @@ export default function Landing({ onDonate, onStartCampaign }) {
                       alt={camp.title}
                     />
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', gap: '0.75rem', flexWrap: 'wrap' }}>
                     <div className="pill-urgency">{camp.urgency || 'Urgent'}</div>
+                    {camp.isVerified && (
+                      <div className="pill-urgency" style={{ background: '#eef5f1', color: '#0f5132' }}>Verified</div>
+                    )}
                     {beneficiaryDisplay && (
                       <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--primary)' }}>For: {beneficiaryDisplay}</span>
                     )}

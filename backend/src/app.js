@@ -9,6 +9,7 @@ const beneficiaryRoutes = require("./routes/beneficiary");
 const donorRoutes = require("./routes/donor");
 const campaignRoutes = require("./routes/campaign");
 const donationRoutes = require("./routes/donation");
+const webhookRoutes = require("./routes/webhook");
 const adminRoutes = require("./routes/admin");
 const response = require("./middleware/response");
 const mockData = require("./middleware/mockData");
@@ -98,6 +99,7 @@ app.use("/api/beneficiary", beneficiaryRoutes);
 app.use("/api/donor", donorRoutes);
 app.use("/api/campaign", campaignRoutes);
 app.use("/api/donation", donationRoutes);
+app.use("/api/webhook", webhookRoutes);
 app.use("/api", adminRoutes);
 
 app.use((req, res) => {

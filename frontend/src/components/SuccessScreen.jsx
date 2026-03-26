@@ -1,12 +1,14 @@
 import { useLocation } from 'react-router-dom';
+import { api } from '../services/api';
 
-export default function SuccessScreen({ amount: propAmount, campaignTitle: propTitle, newPercent: propPercent, onFinish }) {
+export default function SuccessScreen({ amount: propAmount, campaignTitle: propTitle, newPercent: propPercent, onFinish, donationId: propDonationId }) {
   const location = useLocation();
-  const { amount: stateAmount, title: stateTitle, newPercent: statePercent } = location.state || {};
+  const { amount: stateAmount, title: stateTitle, newPercent: statePercent, donationId: stateDonationId } = location.state || {};
   
   const amount = stateAmount || propAmount || 0;
   const campaignTitle = stateTitle || propTitle || 'the';
   const newPercent = statePercent || propPercent || 0;
+  const donationId = stateDonationId || propDonationId;
 
   return (
     <div className="fade-in">
@@ -30,8 +32,17 @@ export default function SuccessScreen({ amount: propAmount, campaignTitle: propT
         </div>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1.5rem', marginBottom: '4rem' }}>
-          <button className="btn btn-primary btn-lg">Share with friends</button>
-          <button className="btn btn-outline btn-lg" style={{ borderColor: '#25D366', color: '#128C7E' }}>Invite on WhatsApp</button>
+          {donationId && (
+            <a
+              className="btn btn-primary btn-lg"
+              href={api.getReceiptUrl(donationId)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Download Receipt
+            </a>
+          )}
+          <button className="btn btn-outline btn-lg">Share with friends</button>
         </div>
 
         <button 

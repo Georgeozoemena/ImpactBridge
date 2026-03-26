@@ -8,6 +8,7 @@ const campaignSchema = new mongoose.Schema(
     raisedAmount: { type: Number, default: 0 },
     donorCount: { type: Number, default: 0 },
     status: { type: String, enum: ["active", "inactive", "completed"], default: "active" },
+    isVerified: { type: Boolean, default: false },
     deadline: { type: Date },
     imageUrl: { type: String, trim: true },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }

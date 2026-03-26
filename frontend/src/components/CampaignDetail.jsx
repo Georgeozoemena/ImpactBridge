@@ -159,8 +159,13 @@ export default function CampaignDetail({ onDonate, onBack }) {
 
           {/* Campaign Story */}
           <div className="campaign-story">
-            <div className="pill-urgency" style={{ marginBottom: '2rem' }}>
-              {campaign.status === 'active' ? '🔴 Active' : '⚫ ' + campaign.status}
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap', marginBottom: '2rem' }}>
+              <div className="pill-urgency">
+                {campaign.status === 'active' ? 'Active' : campaign.status}
+              </div>
+              {campaign.isVerified && (
+                <div className="pill-urgency" style={{ background: '#eef5f1', color: '#0f5132' }}>Verified</div>
+              )}
             </div>
             <p style={{ fontSize: '1.25rem', lineHeight: 2, color: 'var(--text-main)', marginBottom: '3rem' }}>
               {campaign.description}

@@ -51,10 +51,11 @@ export default function PaymentCallback() {
           const amount = response.donation?.amount || pendingDonation.amount || 0;
           const title = response.campaignTitle || pendingDonation.campaignTitle || 'the';
           const newPercent = response.newPercent || response.donation?.newPercent || 0;
+          const donationId = response.donation?._id || pendingDonation.donationId;
           
           // Small delay for UX
           setTimeout(() => {
-            navigate('/success', { state: { amount, title, newPercent } });
+            navigate('/success', { state: { amount, title, newPercent, donationId } });
           }, 1500);
         } else {
           throw new Error(response?.message || 'Verification failed');
