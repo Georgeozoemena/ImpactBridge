@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import { getHealthFallback } from '../utils/visuals';
 
 export default function Landing({ onDonate, onStartCampaign }) {
   const [campaigns, setCampaigns] = useState([]);
@@ -105,7 +106,7 @@ export default function Landing({ onDonate, onStartCampaign }) {
               const localImages = JSON.parse(localStorage.getItem(`campaign_images_${campId}`) || '[]');
               const localBeneficiary = localStorage.getItem(`campaign_beneficiary_${campId}`);
               const beneficiaryDisplay = camp.beneficiaryName || localBeneficiary;
-              const displayImage = localImages.length > 0 ? localImages[0] : (camp.imageUrl || `https://picsum.photos/seed/${campId}/800/600`);
+              const displayImage = localImages.length > 0 ? localImages[0] : (camp.imageUrl || getHealthFallback(campId));
 
               return (
                 <div key={campId} className="card-editorial" onClick={() => navigate(`/campaign/${campId}`)} style={{ cursor: 'pointer' }}>

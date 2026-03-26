@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import { getHealthFallback } from '../utils/visuals';
 
 export default function CampaignDetail({ onDonate, onBack }) {
   const { id } = useParams();
@@ -104,7 +105,7 @@ export default function CampaignDetail({ onDonate, onBack }) {
   const localImages = JSON.parse(localStorage.getItem(`campaign_images_${campId}`) || '[]');
   const localBeneficiary = localStorage.getItem(`campaign_beneficiary_${campId}`);
   const beneficiaryDisplay = campaign.beneficiaryName || localBeneficiary;
-  const displayImage = localImages.length > 0 ? localImages[0] : (campaign.imageUrl || 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=1200');
+  const displayImage = localImages.length > 0 ? localImages[0] : (campaign.imageUrl || getHealthFallback(campId));
 
   const raised = campaign.raisedAmount || 0;
   const target = campaign.targetAmount || 1;
