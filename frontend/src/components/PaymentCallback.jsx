@@ -36,7 +36,12 @@ export default function PaymentCallback() {
           throw new Error('Donation context lost. Please try donating again.');
         }
 
-        const response = await api.verifyDonation(txnRef, pendingDonation.amount);
+        const response = await api.processDonation(
+          pendingDonation.campaignId,
+          pendingDonation.amount,
+          pendingDonation.donorName || 'Anonymous',
+          txnRef
+        );
 
         if (response && (response.success || response.donation)) {
           setStatus('success');
