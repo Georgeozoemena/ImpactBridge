@@ -51,7 +51,9 @@ app.all("/payment/callback", (req, res) => {
     payload.txnref ||
     payload.transaction_ref ||
     payload.reference ||
-    payload.ref;
+    payload.ref ||
+    payload.txRef ||
+    payload.txnRef;
 
   if (frontendUrl) {
     try {
@@ -59,8 +61,10 @@ app.all("/payment/callback", (req, res) => {
       const redirectUrl = new URL(`${base}/payment/callback`);
       if (txnRef) redirectUrl.searchParams.set("txn_ref", txnRef);
       if (payload.amount) redirectUrl.searchParams.set("amount", payload.amount);
+      if (payload.apprAmt) redirectUrl.searchParams.set("apprAmt", payload.apprAmt);
       if (payload.resp) redirectUrl.searchParams.set("resp", payload.resp);
       if (payload.payRef) redirectUrl.searchParams.set("payRef", payload.payRef);
+      if (payload.retRef) redirectUrl.searchParams.set("retRef", payload.retRef);
       return res.redirect(302, redirectUrl.toString());
     } catch (err) {
       console.error("Callback redirect failed:", err);
