@@ -99,7 +99,7 @@ const processDonation = async (req, res) => {
 };
 
 const initiateDonation = async (req, res) => {
-  const { campaignId, amount, redirectUrl } = req.body;
+  const { campaignId, amount } = req.body;
   const donorName = req.body.donorName || req.user.name;
   const donorEmail = req.body.donorEmail || req.user.email;
   const numericAmount = Number(amount);
@@ -134,7 +134,6 @@ const initiateDonation = async (req, res) => {
     customerId: req.user._id.toString(),
     customerEmail: donorEmail,
     customerName: donorName,
-    redirectUrl,
     payItemName: campaign.title
   });
 
