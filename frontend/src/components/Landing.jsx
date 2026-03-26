@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import gsap from 'gsap';
 import { api } from '../services/api';
 import { getHealthFallback, parseBeneficiaryName } from '../utils/visuals';
 
@@ -9,6 +10,9 @@ export default function Landing({ onDonate, onStartCampaign }) {
   const [tickerIndex, setTickerIndex] = useState(0);
   const navigate = useNavigate();
 
+  const heroRef = useRef(null);
+  const visualsRef = useRef(null);
+
   const activities = [
     { name: 'Ayo', amount: '2,000', context: "Chioma's Surgery" },
     { name: 'Grace', amount: '15,000', context: "The General Fund" },
@@ -16,11 +20,46 @@ export default function Landing({ onDonate, onStartCampaign }) {
   ];
 
   useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.from('.hero-reveal', {
+        y: 60,
+        opacity: 0,
+        duration: 1.2,
+        stagger: 0.2,
+        ease: 'power4.out',
+        delay: 0.5
+      });
+
+      gsap.from('.visual-reveal', {
+        scale: 0.8,
+        opacity: 0,
+        duration: 1.5,
+        ease: 'elastic.out(1, 0.75)',
+        delay: 0.8
+      });
+
+      const handleMouseMove = (e) => {
+        const { clientX, clientY } = e;
+        const xPos = (clientX / window.innerWidth - 0.5) * 40;
+        const yPos = (clientY / window.innerHeight - 0.5) * 40;
+
+        gsap.to('.hero-main-img', { x: xPos * 0.5, y: yPos * 0.5, duration: 1 });
+        gsap.to('.float-top-right', { x: xPos * 1.5, y: yPos * 1.5, duration: 1.2 });
+        gsap.to('.float-bottom-left', { x: -xPos * 2, y: -yPos * 2, duration: 1.4 });
+        gsap.to('.float-mid-left', { x: xPos, y: -yPos, duration: 1.1 });
+      };
+
+      window.addEventListener('mousemove', handleMouseMove);
+      return () => window.removeEventListener('mousemove', handleMouseMove);
+    }, heroRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  useEffect(() => {
     const fetchCampaigns = async () => {
       try {
         const response = await api.getCampaigns();
-        // Handle both: local mock returning {campaigns: []} 
-        // and potential deployed backend structures
         const campaignList = response.campaigns || response.data?.campaigns || (Array.isArray(response) ? response : []);
         setCampaigns(campaignList);
       } catch (error) {
@@ -31,14 +70,12 @@ export default function Landing({ onDonate, onStartCampaign }) {
     };
     fetchCampaigns();
 
-    // Socket integration for real-time updates on all campaigns
     const socket = api.connectSocket();
-    
     socket.on('campaignProgress', (data) => {
-      setCampaigns(prev => prev.map(c => 
-        (c._id === data.campaignId || c.id === data.campaignId) 
-        ? { ...c, ...data } 
-        : c
+      setCampaigns(prev => prev.map(c =>
+        (c._id === data.campaignId || c.id === data.campaignId)
+          ? { ...c, ...data }
+          : c
       ));
     });
 
@@ -56,34 +93,73 @@ export default function Landing({ onDonate, onStartCampaign }) {
 
   return (
     <div className="fade-in">
-      {/* Editorial Hero Section */}
-      <section style={{ background: 'var(--background)', padding: '6rem 0 4rem' }}>
+      <section ref={heroRef} style={{ position: 'relative', overflow: 'hidden', padding: 'var(--section-spacing) 0 4rem' }}>
+        <div className="mesh-gradient"></div>
         <div className="container">
-          <h1 className="editorial-heading" style={{ fontSize: 'clamp(3.5rem, 12vw, 8.5rem)', fontWeight: 900, lineHeight: 0.85, textAlign: 'center', color: 'var(--text-main)', letterSpacing: '-0.05em' }}>
-            Turn Payments Into Impact
-            <div className="oval-mask">
-              <img src="https://images.unsplash.com/photo-1542810634-71277d95dcbb?auto=format&fit=crop&q=80&w=400" alt="Hope" />
+          <div className="hero-grid">
+            <div className="hero-content">
+              <span className="hero-reveal status-chip" style={{ width: 'fit-content', marginBottom: '1.5rem', display: 'block' }}>
+                Verified Medical Crowdfunding
+              </span>
+              <h1 className="hero-reveal hero-heading">
+                Turn Payments Into <span style={{ color: 'var(--primary-vibrant)' }}>Impact</span> for Health Cause
+              </h1>
+              <p className="hero-reveal hero-subtext">
+                ImpactBridge removes the middleman between compassion and care. Directly fund surgeries and treatments for Nigerians in need with 100% transparency.
+              </p>
+              <div className="hero-reveal" style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', marginBottom: '2rem' }}>
+                <button className="btn btn-primary btn-lg" onClick={() => onDonate()}>Donate Now</button>
+                <button className="btn btn-outline btn-lg" onClick={onStartCampaign}>Start a Campaign</button>
+              </div>
+              <div className="hero-reveal" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>
+                <div style={{ display: 'flex', marginLeft: '0.5rem' }}>
+                  {[1, 2, 3].map(i => (
+                    <div key={i} style={{ width: '32px', height: '32px', borderRadius: '50%', border: '2px solid white', marginLeft: '-10px', background: '#EEE', overflow: 'hidden' }}>
+                      <img src={`https://i.pravatar.cc/100?u=${3}`} alt="user" />
+                    </div>
+                  ))}
+                </div>
+                <span>Joined by 12,000+ donors this month</span>
+              </div>
             </div>
-            for Health Cause
-          </h1>
-          <p style={{ textAlign: 'center', width: '100%', maxWidth: '600px', margin: '3rem auto 4rem', fontSize: '1.25rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
-            Every naira you contribute saves a real life. We bridge the gap between verified medical needs and your compassion.
-          </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1.5rem', marginBottom: '6rem' }}>
-            <button className="btn btn-primary btn-lg" onClick={() => onDonate()}>Donate Now</button>
-            <button className="btn btn-outline btn-lg" onClick={onStartCampaign}>Start a Campaign</button>
+
+            <div className="visual-reveal floating-container">
+              <img
+                src="/sick.jpg"
+                className="hero-main-img"
+                alt="ImpactBridge Beneficiary"
+              />
+
+              <div className="floating-element glass-card float-top-right">
+                <div className="status-chip" style={{ background: '#E0F2F1', color: '#00695C' }}>Secure</div>
+                <span>Verified Case</span>
+              </div>
+
+              <div className="floating-element glass-card float-bottom-left" style={{ padding: '1.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Recent Donation</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>₦150,000</div>
+                  <div style={{ height: '4px', width: '100%', background: '#EEE', borderRadius: '2px' }}>
+                    <div style={{ width: '70%', height: '100%', background: 'var(--primary-vibrant)', borderRadius: '2px' }}></div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="floating-element glass-card float-mid-left" style={{ borderRadius: '100px' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4CAF50' }}></div>
+                <span>Live Impact</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       <div className="container">
-        {/* Live Activity Ticker */}
         <div style={{ marginBottom: '8rem', fontSize: '1.125rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', background: 'white', border: '1px solid var(--border)', borderRadius: '100px', width: 'fit-content', margin: '0 auto 8rem' }}>
           <span className="pulse-dot"></span>
           <span>{activities[tickerIndex].name} just donated ₦{activities[tickerIndex].amount} to <span style={{ color: 'var(--primary)' }}>{activities[tickerIndex].context}</span></span>
         </div>
 
-        {/* Horizontal Campaign Slider */}
         <section style={{ marginBottom: '10rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '4rem' }}>
             <div>
@@ -95,7 +171,7 @@ export default function Landing({ onDonate, onStartCampaign }) {
               <button className="nav-btn-circle">→</button>
             </div>
           </div>
-          
+
           <div className="scroll-slider">
             {loading ? (
               <div style={{ padding: '4rem', textAlign: 'center', width: '100%' }}>Loading campaigns...</div>
@@ -109,12 +185,12 @@ export default function Landing({ onDonate, onStartCampaign }) {
               const displayImage = localImages.length > 0 ? localImages[0] : (camp.imageUrl || getHealthFallback(campId));
 
               return (
-                <div key={campId} className="card-editorial" onClick={() => navigate(`/campaign/${campId}`)} style={{ cursor: 'pointer' }}>
-                  <div style={{ height: '300px', background: '#EEE', marginBottom: '2rem', borderRadius: '4px', overflow: 'hidden' }}>
-                    <img 
-                      src={displayImage} 
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                      alt={camp.title} 
+                <div key={campId} className="card-editorial" onClick={() => navigate(`/campaign/${campId}`)} style={{ cursor: 'pointer', background: 'var(--surface)' }}>
+                  <div style={{ height: '280px', background: '#F2F5F8', marginBottom: '2rem', borderRadius: '16px', overflow: 'hidden' }}>
+                    <img
+                      src={displayImage}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      alt={camp.title}
                     />
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
@@ -124,61 +200,66 @@ export default function Landing({ onDonate, onStartCampaign }) {
                     )}
                   </div>
                   <h3 style={{ fontSize: '1.75rem', marginBottom: '1rem', lineHeight: 1.2 }}>{camp.title}</h3>
-                
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--primary)' }}>The Narrative</span>
-                  <p style={{ fontSize: '1rem', color: 'var(--text-muted)', marginTop: '0.5rem', marginBottom: '0', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                    {camp.description}
-                  </p>
-                </div>
 
-                <div style={{ marginBottom: '2rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 700 }}>
-                    <span>Goal: ₦{(camp.targetAmount || camp.goal_amount || 0).toLocaleString()}</span>
-                    {camp.deadline && (
-                      <span style={{ color: 'var(--text-muted)' }}>Ends: {new Date(camp.deadline).toLocaleDateString()}</span>
-                    )}
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--primary)' }}>The Narrative</span>
+                    <p style={{ fontSize: '1rem', color: 'var(--text-muted)', marginTop: '0.5rem', marginBottom: '0', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {camp.description}
+                    </p>
                   </div>
-                  <div className="progress-bar-thin" style={{ height: '4px', marginBottom: '1rem' }}>
-                    <div className="progress-fill-thin" style={{ width: `${Math.min(((camp.raisedAmount || camp.current_amount || 0) / (camp.targetAmount || camp.goal_amount || 1)) * 100, 100)}%`, height: '100%' }} />
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.1rem', fontWeight: 800 }}>
-                    <span>₦{(camp.raisedAmount || camp.current_amount || 0).toLocaleString()} raised</span>
-                    <span style={{ color: 'var(--primary)' }}>{Math.round(((camp.raisedAmount || camp.current_amount || 0) / (camp.targetAmount || camp.goal_amount || 1)) * 100)}%</span>
-                  </div>
-                </div>
 
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                  <button 
-                    className="btn btn-primary" 
-                    style={{ flex: 2, padding: '1rem' }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDonate(camp._id || camp.id);
-                    }}
-                  >
-                    Donate
-                  </button>
-                  <button 
-                    className="btn btn-outline" 
-                    style={{ flex: 1, padding: '1rem' }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const url = `${window.location.origin}/campaign/${camp._id || camp.id}`;
-                      if (navigator.share) {
-                        navigator.share({
-                          title: camp.title,
-                          text: `Help support this campaign: ${camp.title}`,
-                          url: url
-                        });
-                      } else {
-                        navigator.clipboard.writeText(url);
-                        alert('Link copied to clipboard!');
-                      }
-                    }}
-                  >
-                    Share
-                  </button>
+                  <div style={{ marginBottom: '2rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontSize: '0.85rem', fontWeight: 800 }}>
+                      <span>₦{(camp.raisedAmount || camp.current_amount || 0).toLocaleString()} raised</span>
+                      <span style={{ color: 'var(--primary)' }}>{Math.round(((camp.raisedAmount || camp.current_amount || 0) / (camp.targetAmount || camp.goal_amount || 1)) * 100)}%</span>
+                    </div>
+                    <div className="progress-bar-thin" style={{ height: '6px', background: '#E0E4E8', borderRadius: 'var(--radius-pill)', marginBottom: '0.5rem' }}>
+                      <div
+                        className="progress-fill-thin"
+                        style={{
+                          width: `${Math.min(((camp.raisedAmount || camp.current_amount || 0) / (camp.targetAmount || camp.goal_amount || 1)) * 100, 100)}%`,
+                          height: '100%',
+                          background: 'var(--primary)',
+                          borderRadius: 'var(--radius-pill)'
+                        }}
+                      />
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                      Goal: ₦{(camp.targetAmount || camp.goal_amount || 0).toLocaleString()}
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button
+                      className="btn btn-primary"
+                      style={{ flex: 2, padding: '1rem' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDonate(camp._id || camp.id);
+                      }}
+                    >
+                      Donate
+                    </button>
+                    <button
+                      className="btn btn-outline"
+                      style={{ flex: 1, padding: '1rem' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const url = `${window.location.origin}/campaign/${camp._id || camp.id}`;
+                        if (navigator.share) {
+                          navigator.share({
+                            title: camp.title,
+                            text: `Help support this campaign: ${camp.title}`,
+                            url: url
+                          });
+                        } else {
+                          navigator.clipboard.writeText(url);
+                          alert('Link copied to clipboard!');
+                        }
+                      }}
+                    >
+                      Share
+                    </button>
                   </div>
                 </div>
               );
@@ -186,7 +267,6 @@ export default function Landing({ onDonate, onStartCampaign }) {
           </div>
         </section>
 
-        {/* Massive Global Stats */}
         <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '4rem', borderTop: '1px solid var(--border)', paddingTop: '8rem', paddingBottom: '10rem' }}>
           <div className="reveal-up">
             <div className="stat-value">12.4k</div>

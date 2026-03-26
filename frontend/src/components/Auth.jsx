@@ -21,10 +21,8 @@ export default function Auth({ onAuth, onCancel }) {
       let response;
 
       if (isLogin) {
-        // Login flow - same for both roles
         response = await api.login(email, password);
       } else {
-        // Registration flow - different endpoints per role
         if (role === 'beneficiary') {
           if (!phone) {
             throw new Error('Phone number required for beneficiary registration');
@@ -148,7 +146,6 @@ export default function Auth({ onAuth, onCancel }) {
             </div>
           )}
 
-          {/* Phone Field - Only for Beneficiary Registration */}
           {!isLogin && role === 'beneficiary' && (
             <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>
               <span className="label-muted">Phone Number</span>
@@ -216,7 +213,6 @@ export default function Auth({ onAuth, onCancel }) {
           </button>
         </form>
 
-        {/* Toggle Login/Register */}
         <div style={{ marginTop: '5rem', textAlign: 'center', fontSize: '1.125rem' }}>
           <span style={{ color: 'var(--text-muted)' }}>
             {isLogin ? "Don't have an account?" : 'Already have an account?'}

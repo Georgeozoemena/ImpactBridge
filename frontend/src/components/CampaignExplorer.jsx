@@ -63,14 +63,18 @@ export default function CampaignExplorer({ onDonate }) {
               onChange={(e) => setSearch(e.target.value)}
               style={{
                 width: '100%',
-                padding: '1.25rem 1.5rem',
-                borderRadius: 'var(--radius-full)',
-                border: '1px solid var(--border)',
+                padding: '1.1rem 1.8rem',
+                borderRadius: 'var(--radius-pill)',
+                border: '1.5px solid var(--border)',
                 background: 'var(--surface)',
                 color: 'var(--text-main)',
-                fontSize: '0.9rem',
-                fontWeight: 500
+                fontSize: '0.95rem',
+                fontWeight: 600,
+                outline: 'none',
+                transition: 'border-color 0.2s ease'
               }}
+              onFocus={(e) => e.target.style.borderColor = 'var(--primary)'}
+              onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
             />
           </div>
         </div>
@@ -102,28 +106,27 @@ export default function CampaignExplorer({ onDonate }) {
                 return (
                   <div
                     key={campId}
-                    className="card"
+                    className="card-editorial"
                     style={{
                       display: 'flex',
                       flexDirection: 'column',
                       height: '100%',
                       overflow: 'hidden',
-                      border: 'none',
+                      border: '1.5px solid var(--border)',
                       background: 'var(--surface)',
-                      borderBottom: '1px solid var(--border)',
-                      borderRadius: 0
+                      borderRadius: 'var(--radius-lg)'
                     }}
                   >
                     {/* Campaign Image */}
                     <div
                       style={{
-                        background: '#F5F5F5',
+                        background: '#F2F5F8',
                         aspectRatio: '16/10',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         marginBottom: '2rem',
-                        borderRadius: 'var(--radius-md)',
+                        borderRadius: '16px',
                         overflow: 'hidden'
                       }}
                     >
@@ -150,17 +153,17 @@ export default function CampaignExplorer({ onDonate }) {
 
                       {/* Progress Bar & Amount */}
                       <div style={{ marginBottom: '2rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontSize: '0.85rem', fontWeight: 800 }}>
                           <span>₦{raised.toLocaleString()} raised</span>
-                          <span style={{ color: 'var(--primary-dark)' }}>{percent}%</span>
+                          <span style={{ color: 'var(--primary)' }}>{percent}%</span>
                         </div>
-                        <div style={{ height: '3px', background: '#E5E5E5', borderRadius: 'var(--radius-full)' }}>
+                        <div style={{ height: '6px', background: '#E0E4E8', borderRadius: 'var(--radius-pill)' }}>
                           <div
                             style={{
                               height: '100%',
                               width: `${Math.min(percent, 100)}%`,
                               background: 'var(--primary)',
-                              borderRadius: 'var(--radius-full)'
+                              borderRadius: 'var(--radius-pill)'
                             }}
                           />
                         </div>

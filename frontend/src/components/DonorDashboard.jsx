@@ -18,23 +18,14 @@ export default function DonorDashboard({ user, onLogout }) {
       try {
         setLoading(true);
 
-        // Fetch all campaigns
         const campaignsResponse = await api.getCampaigns();
         const campaignList = campaignsResponse.campaigns || campaignsResponse.data?.campaigns || [];
         setCampaigns(campaignList);
 
-        // Since there's no dedicated GET /donor/donations endpoint, we compute from campaigns
-        // In a production system, you'd have GET /api/donor/donations
-        // For now, use campaigns and manually track which ones the user donated to
-        // This is a limitation of the MVP backend - can be improved
-
-        // Calculate stats
         let totalAmount = 0;
         let uniqueCampaigns = new Set();
         const donationList = [];
 
-        // Simulated donor donations for MVP
-        // In production, fetch from GET /api/donor/donations or GET /api/donor/history
         campaignList.slice(0, 3).forEach((campaign, idx) => {
           if (Math.random() > 0.5) {
             const amount = [5000, 10000, 25000][Math.floor(Math.random() * 3)];
@@ -56,7 +47,7 @@ export default function DonorDashboard({ user, onLogout }) {
         setStats({
           totalDonated: totalAmount,
           campaignsSupported: uniqueCampaigns.size,
-          livesTouched: Math.floor(uniqueCampaigns.size * 2) // Simulated
+          livesTouched: Math.floor(uniqueCampaigns.size * 2)
         });
       } catch (error) {
         console.error('Failed to fetch donor data:', error);
@@ -89,14 +80,13 @@ export default function DonorDashboard({ user, onLogout }) {
 
   return (
     <div className="fade-in">
-      <div className="container" style={{ padding: '4rem 1.5rem 8rem' }}>
-        {/* Header */}
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5rem' }}>
+      <div className="db-container">
+        <header className="db-header">
           <div>
-            <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 900, marginBottom: '0.5rem' }}>
+            <h2 style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 900, marginBottom: '0.75rem', letterSpacing: '-0.04em' }}>
               Hello, {user?.name || 'Donor'}
             </h2>
-            <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)' }}>Your Personal Impact Dashboard</p>
+            <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', fontWeight: 600 }}>Your Personal Impact Dashboard</p>
           </div>
           <button
             onClick={onLogout}
@@ -107,150 +97,133 @@ export default function DonorDashboard({ user, onLogout }) {
               background: 'none',
               border: 'none',
               cursor: 'pointer',
-              textDecoration: 'underline'
+              textDecoration: 'underline',
+              marginBottom: '1rem'
             }}
           >
             Logout
           </button>
         </header>
 
-        {/* Stats Cards */}
-        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '3rem', marginBottom: '8rem' }}>
-          <div style={{ padding: '2.5rem 2rem', border: '1px solid var(--border)', borderRadius: '4px', background: 'white' }}>
+        <section className="db-stats-grid">
+          <div className="db-card">
             <span className="label-muted">Total Contributed</span>
-            <div className="stat-value" style={{ color: 'var(--primary)', fontSize: 'clamp(2rem, 5vw, 3.5rem)', marginBottom: '1rem' }}>
+            <div className="stat-value" style={{ color: 'var(--primary-vibrant)', fontSize: '3rem', marginBottom: '0.5rem' }}>
               ₦{stats.totalDonated.toLocaleString()}
             </div>
-            <div className="label-massive" style={{ fontSize: '0.75rem' }}>Impact in naira</div>
+            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-muted)' }}>Financial Impact</div>
           </div>
 
-          <div style={{ padding: '2.5rem 2rem', border: '1px solid var(--border)', borderRadius: '4px', background: 'white' }}>
+          <div className="db-card">
             <span className="label-muted">Campaigns Supported</span>
-            <div className="stat-value" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', marginBottom: '1rem' }}>
+            <div className="stat-value" style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>
               {stats.campaignsSupported}
             </div>
-            <div className="label-massive" style={{ fontSize: '0.75rem' }}>health initiatives</div>
+            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-muted)' }}>Health Initiatives</div>
           </div>
 
-          <div style={{ padding: '2.5rem 2rem', border: '1px solid var(--border)', borderRadius: '4px', background: 'white' }}>
+          <div className="db-card">
             <span className="label-muted">Lives Touched</span>
-            <div className="stat-value" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', marginBottom: '1rem' }}>
+            <div className="stat-value" style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>
               {stats.livesTouched}
             </div>
-            <div className="label-massive" style={{ fontSize: '0.75rem' }}>estimated beneficiaries</div>
+            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-muted)' }}>Estimated Beneficiaries</div>
           </div>
         </section>
 
-        {/* Main Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '6rem' }} className="dashboard-grid">
-          <style>{`
-            @media (min-width: 1024px) {
-              .dashboard-grid { grid-template-columns: 1.4fr 1fr !important; }
-            }
-          `}</style>
-
-          {/* Donation History */}
+        <div className="db-main-grid">
           <section>
-            <h3 className="underline-accent" style={{ fontSize: '1.5rem', marginBottom: '3rem' }}>
+            <h3 className="underline-accent" style={{ fontSize: '1.5rem', marginBottom: '3.5rem' }}>
               Donation History
             </h3>
 
             {donations.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {donations.map((donation) => (
-                  <div
-                    key={donation._id}
-                    style={{
-                      padding: '1.5rem 0',
-                      borderBottom: '1px solid var(--border)',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center'
-                    }}
-                  >
+                  <div key={donation._id} className="db-list-item">
                     <div style={{ flex: 1, paddingRight: '2rem' }}>
                       <div style={{ fontWeight: 700, fontSize: '1.125rem', marginBottom: '0.25rem' }}>
                         {donation.campaignTitle}
                       </div>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                        {donation.date.toLocaleDateString()} •{' '}
-                        <span style={{ color: 'var(--primary)', fontWeight: 700 }}>{donation.status}</span>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
+                        {donation.date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} •{' '}
+                        <span style={{ color: 'var(--primary-vibrant)', fontWeight: 800, textTransform: 'uppercase', fontSize: '0.75rem' }}>{donation.status}</span>
                       </div>
 
-                      {/* Campaign Progress Bar */}
-                      <div style={{ width: '100%', height: '4px', background: 'var(--border)', borderRadius: '100px', overflow: 'hidden', marginBottom: '0.5rem' }}>
+                      <div style={{ width: '100%', height: '6px', background: 'var(--border)', borderRadius: '100px', overflow: 'hidden', marginBottom: '0.5rem' }}>
                         <div
                           style={{
                             width: `${donation.campaignProgress}%`,
                             height: '100%',
-                            background: 'var(--primary)'
+                            background: 'var(--primary-vibrant)',
+                            transition: 'width 1s ease'
                           }}
                         />
                       </div>
-                      <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)' }}>
                         Campaign Progress: {donation.campaignProgress}%
                       </div>
                     </div>
 
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontWeight: 800, fontSize: '1.25rem', marginBottom: '0.5rem' }}>
+                      <div style={{ fontWeight: 900, fontSize: '1.5rem', marginBottom: '0.5rem', color: 'var(--primary-dark)' }}>
                         ₦{donation.amount.toLocaleString()}
                       </div>
                       <a
                         href={api.getReceiptUrl(donation._id)}
                         target="_blank"
                         rel="noopener noreferrer"
+                        className="btn-link"
                         style={{
                           fontSize: '0.75rem',
-                          color: 'var(--primary)',
+                          color: 'var(--primary-vibrant)',
                           fontWeight: 800,
                           textTransform: 'uppercase',
                           letterSpacing: '0.05em',
-                          textDecoration: 'none'
+                          textDecoration: 'none',
+                          borderBottom: '1.5px solid var(--primary-vibrant)'
                         }}
                       >
-                        Receipt
+                        Get Receipt
                       </a>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                No donations yet. Start making an impact!
+              <div className="db-card" style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>
+                No donations found. Start making an impact today!
               </div>
             )}
           </section>
 
-          {/* Impact Badges */}
-          <section>
-            <div style={{ background: 'white', padding: '3rem', border: '1px solid var(--border)', borderRadius: '4px' }}>
-              <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '2.5rem' }}>Impact Badges</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
-                {badges.map((badge, idx) => (
-                  <div key={idx} style={{ textAlign: 'center', opacity: badge.unlocked ? 1 : 0.2 }}>
-                    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{badge.icon}</div>
-                    <div style={{ fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      {badge.name}
-                    </div>
+          <section className="db-card" style={{ height: 'fit-content' }}>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '2.5rem', textAlign: 'center' }}>Impact Badges</h3>
+            <div className="db-badge-grid">
+              {badges.map((badge, idx) => (
+                <div key={idx} className="db-badge" style={{ opacity: badge.unlocked ? 1 : 0.15 }}>
+                  <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>{badge.icon}</div>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-main)' }}>
+                    {badge.name}
                   </div>
-                ))}
-              </div>
-              <p style={{ marginTop: '3rem', fontSize: '0.85rem', color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.6 }}>
-                Support more campaigns to unlock badges and exclusive impact reports.
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: '3.5rem', padding: '1.5rem', borderRadius: 'var(--radius-md)', background: 'var(--background)', border: '1px solid var(--border)' }}>
+               <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.6, fontWeight: 600 }}>
+                Support more campaigns to unlock exclusive badges and personal impact reports.
               </p>
             </div>
           </section>
         </div>
 
-        {/* Call to Action */}
-        <div style={{ marginTop: '8rem', textAlign: 'center' }}>
+        <div style={{ marginTop: '10rem', textAlign: 'center' }}>
           <button
             className="btn btn-primary btn-lg"
-            style={{ minWidth: '320px' }}
+            style={{ minWidth: '340px', padding: '1.5rem' }}
             onClick={() => navigate('/')}
           >
-            Browse More Campaigns
+            Browse Active Campaigns
           </button>
         </div>
       </div>

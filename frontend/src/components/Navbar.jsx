@@ -1,43 +1,42 @@
 import { useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 
-export default function Navbar({ onNavigate, user }) {
+export default function Navbar({ user }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <nav className="navbar">
       <div className="container nav-content">
-        <a href="#" className="nav-logo" onClick={(e) => { e.preventDefault(); onNavigate('/'); }}>
+        <NavLink to="/" className="nav-logo">
           ImpactBridge
-        </a>
+        </NavLink>
 
         <div className="nav-links">
-          <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('/'); }}>Campaigns</a>
-          <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('/transparency'); }}>Transparency</a>
-          <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('/about'); }}>About</a>
+          <NavLink to="/" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>Campaigns</NavLink>
+          <NavLink to="/transparency" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>Transparency</NavLink>
+          <NavLink to="/about" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>About</NavLink>
 
-          <div className="nav-actions">
+          <div className="nav-actions" style={{ marginLeft: '2rem' }}>
             {!user ? (
               <>
                 <button
                   className="btn btn-outline"
-                  style={{ padding: '0.6rem 1.5rem', fontSize: '0.85rem' }}
-                  onClick={() => onNavigate('/auth')}
+                  onClick={() => navigate('/auth')}
                 >
                   Sign In
                 </button>
                 <button
                   className="btn btn-primary"
-                  style={{ padding: '0.6rem 1.5rem', fontSize: '0.85rem' }}
-                  onClick={() => onNavigate('/')}
+                  onClick={() => navigate('/')}
                 >
-                  Donate
+                  Donate Now
                 </button>
               </>
             ) : (
               <button
                 className="btn btn-primary"
-                style={{ padding: '0.6rem 1.5rem', fontSize: '0.85rem' }}
-                onClick={() => onNavigate('/dashboard')}
+                onClick={() => navigate('/dashboard')}
               >
                 Dashboard
               </button>
@@ -61,25 +60,25 @@ export default function Navbar({ onNavigate, user }) {
           left: 0,
           right: 0,
           background: 'white',
-          padding: '2rem',
-          borderBottom: '1px solid var(--border)',
+          padding: '2.5rem',
+          borderBottom: '1.5px solid var(--border)',
           display: 'flex',
           flexDirection: 'column',
           gap: '1.5rem',
-          zIndex: 800,
-          animation: 'fadeIn 0.3s ease-out'
+          zIndex: 1100,
+          boxShadow: '0 15px 30px rgba(0,0,0,0.05)'
         }}>
-          <a href="#" className="nav-link" onClick={() => { onNavigate('/'); setIsMenuOpen(false); }}>Campaigns</a>
-          <a href="#" className="nav-link" onClick={() => { onNavigate('/transparency'); setIsMenuOpen(false); }}>Transparency</a>
-          <a href="#" className="nav-link" onClick={() => { onNavigate('/about'); setIsMenuOpen(false); }}>About</a>
-          <hr style={{ border: 'none', borderTop: '1px solid var(--border)' }} />
+          <NavLink to="/" className="nav-link" onClick={() => setIsMenuOpen(false)}>Campaigns</NavLink>
+          <NavLink to="/transparency" className="nav-link" onClick={() => setIsMenuOpen(false)}>Transparency</NavLink>
+          <NavLink to="/about" className="nav-link" onClick={() => setIsMenuOpen(false)}>About</NavLink>
+          <hr style={{ border: 'none', borderTop: '1.5px solid var(--border)', margin: '1rem 0' }} />
           {!user ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <button className="btn btn-outline" onClick={() => { onNavigate('/auth'); setIsMenuOpen(false); }}>Sign In</button>
-              <button className="btn btn-primary" onClick={() => { onNavigate('/'); setIsMenuOpen(false); }}>Donate Now</button>
+              <button className="btn btn-outline" style={{ width: '100%' }} onClick={() => { navigate('/auth'); setIsMenuOpen(false); }}>Sign In</button>
+              <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => { navigate('/'); setIsMenuOpen(false); }}>Donate Now</button>
             </div>
           ) : (
-            <button className="btn btn-primary" onClick={() => { onNavigate('/dashboard'); setIsMenuOpen(false); }}>Dashboard</button>
+            <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => { navigate('/dashboard'); setIsMenuOpen(false); }}>Dashboard</button>
           )}
         </div>
       )}

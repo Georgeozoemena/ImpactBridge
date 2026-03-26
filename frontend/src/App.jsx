@@ -23,7 +23,6 @@ export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Check for existing session
   useEffect(() => {
     const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
@@ -48,7 +47,6 @@ export default function App() {
   const handleDonationSuccess = async (amount) => {
     setLastDonationAmount(amount);
     
-    // Optional: Fetch updated progress for the campaign to show on success screen
     try {
       if (activeCampaignId) {
         const progress = await api.getCampaignProgress(activeCampaignId);
@@ -69,7 +67,6 @@ export default function App() {
     setActiveCampaignId(campaignId);
     setBeneficiaryName(''); // Reset
     
-    // Fetch beneficiary name
     try {
       const localName = localStorage.getItem(`campaign_beneficiary_${campaignId}`);
       if (localName) {

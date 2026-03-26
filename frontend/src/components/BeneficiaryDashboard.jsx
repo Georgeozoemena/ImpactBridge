@@ -65,7 +65,6 @@ export default function BeneficiaryDashboard({ user, onLogout }) {
     fetchDashboardData();
   }, [user._id, user.id]);
 
-  // Socket.IO for real-time updates
   useEffect(() => {
     if (!activeCampaign) return;
 
@@ -199,61 +198,50 @@ export default function BeneficiaryDashboard({ user, onLogout }) {
 
   return (
     <div className="fade-in">
-      <div className="container" style={{ padding: '6rem 1.5rem 8rem' }}>
-        {/* Header */}
-        <header
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            gap: '2rem',
-            marginBottom: '5rem'
-          }}
-        >
+      <div className="db-container">
+        <header className="db-header">
           <div>
-            <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 900, marginBottom: '0.5rem' }}>
+            <h2 style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: 900, marginBottom: '0.75rem', letterSpacing: '-0.04em' }}>
               Hello, {user?.name || 'Beneficiary'}
             </h2>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)' }}>Campaign: {activeCampaign.title}</p>
+              <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', fontWeight: 600 }}>Campaign: {activeCampaign.title}</p>
               {(activeCampaign.beneficiaryName || parseBeneficiaryName(activeCampaign.description)) && (
-                <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--primary)', background: '#F0F9FF', padding: '0.25rem 0.75rem', borderRadius: '4px' }}>
+                <span className="pill-urgency" style={{ background: 'rgba(38, 166, 154, 0.1)', color: 'var(--primary)', fontWeight: 800 }}>
                   For: {activeCampaign.beneficiaryName || parseBeneficiaryName(activeCampaign.description)}
                 </span>
               )}
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-            <button onClick={() => setShowCreate(true)} className="btn btn-outline">
+          <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
+            <button onClick={() => setShowCreate(true)} className="btn btn-primary">
               + Create New
             </button>
-            <button onClick={() => setShowSettings(true)} className="btn btn-primary">
-              Campaign Settings
+            <button onClick={() => setShowSettings(true)} className="btn btn-outline">
+              Settings
             </button>
             <button
               onClick={onLogout}
               style={{
-                fontSize: '1rem',
+                fontSize: '0.95rem',
                 fontWeight: 800,
-                opacity: 0.6,
+                color: 'var(--text-muted)',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
+                marginLeft: '1rem',
                 textDecoration: 'underline'
               }}
             >
-              Logout
+              Sign Out
             </button>
           </div>
         </header>
 
-        {/* Notifications */}
         {notification && (
           <Notification message={notification.message} type={notification.type} onClose={() => setNotification(null)} />
         )}
 
-        {/* Settings Modal */}
         {showSettings && (
           <div
             className="fade-in"
@@ -268,11 +256,11 @@ export default function BeneficiaryDashboard({ user, onLogout }) {
               alignItems: 'center',
               justifyContent: 'center',
               background: 'rgba(0,0,0,0.4)',
-              backdropFilter: 'blur(4px)',
+              backdropFilter: 'blur(8px)',
               padding: '2rem'
             }}
           >
-            <div style={{ background: 'white', padding: '3rem', borderRadius: '12px', maxWidth: '400px', width: '100%', textAlign: 'center' }}>
+            <div className="db-card" style={{ maxWidth: '400px', width: '100%', textAlign: 'center' }}>
               <h3 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '2rem' }}>Campaign Settings</h3>
               <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem' }}>Update the status of your campaign.</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -280,7 +268,7 @@ export default function BeneficiaryDashboard({ user, onLogout }) {
                   onClick={() => handleUpdateStatus('active')}
                   className="btn btn-outline"
                   style={{
-                    border: activeCampaign.status === 'active' ? '2px solid var(--primary)' : '1px solid var(--border)'
+                    border: activeCampaign.status === 'active' ? '2.2px solid var(--primary-vibrant)' : '1px solid var(--border)'
                   }}
                 >
                   ✓ Set Active
@@ -289,7 +277,7 @@ export default function BeneficiaryDashboard({ user, onLogout }) {
                   onClick={() => handleUpdateStatus('inactive')}
                   className="btn btn-outline"
                   style={{
-                    border: activeCampaign.status === 'inactive' ? '2px solid var(--primary)' : '1px solid var(--border)'
+                    border: activeCampaign.status === 'inactive' ? '2.2px solid var(--primary-vibrant)' : '1px solid var(--border)'
                   }}
                 >
                   — Set Inactive
@@ -298,7 +286,7 @@ export default function BeneficiaryDashboard({ user, onLogout }) {
                   onClick={() => handleUpdateStatus('completed')}
                   className="btn btn-outline"
                   style={{
-                    border: activeCampaign.status === 'completed' ? '2px solid var(--primary)' : '1px solid var(--border)'
+                    border: activeCampaign.status === 'completed' ? '2.2px solid var(--primary-vibrant)' : '1px solid var(--border)'
                   }}
                 >
                   ✓✓ Mark Completed
@@ -306,7 +294,7 @@ export default function BeneficiaryDashboard({ user, onLogout }) {
                 <button
                   onClick={() => setShowSettings(false)}
                   className="btn btn-link"
-                  style={{ marginTop: '1.5rem', fontWeight: 800 }}
+                  style={{ marginTop: '1.5rem', fontWeight: 800, color: 'var(--text-main)', border: 'none', background: 'none', cursor: 'pointer' }}
                 >
                   Close
                 </button>
@@ -315,113 +303,94 @@ export default function BeneficiaryDashboard({ user, onLogout }) {
           </div>
         )}
 
-        {/* Stats Cards */}
-        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '3rem', marginBottom: '8rem' }}>
-          <div style={{ padding: '2.5rem 2rem', border: '1px solid var(--border)', borderRadius: '4px', background: 'white' }}>
+        <section className="db-stats-grid">
+          <div className="db-card">
             <span className="label-muted">Total Raised</span>
-            <div className="stat-value" style={{ color: 'var(--primary)', fontSize: 'clamp(2rem, 5vw, 3.5rem)', marginBottom: '1rem' }}>
+            <div className="stat-value" style={{ color: 'var(--primary-vibrant)', marginBottom: '0.5rem', fontSize: '3rem' }}>
               ₦{activeCampaign.raisedAmount.toLocaleString()}
             </div>
-            <div className="label-massive" style={{ fontSize: '0.75rem' }}>
-              from {activeCampaign.donorCount || 0} donors
+            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+              from {activeCampaign.donorCount || 0} supporters
             </div>
           </div>
 
-          <div style={{ padding: '2.5rem 2rem', border: '1px solid var(--border)', borderRadius: '4px', background: 'white' }}>
+          <div className="db-card">
             <span className="label-muted">Campaign Status</span>
-            <div className="stat-value" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', marginBottom: '1rem' }}>
+            <div className="stat-value" style={{ marginBottom: '0.5rem', fontSize: '3rem' }}>
               {activeCampaign.status === 'active' ? '✓ Active' : activeCampaign.status === 'completed' ? '✓✓ Done' : '—'}
             </div>
-            <div className="label-massive" style={{ fontSize: '0.75rem' }}>
-              {activeCampaign.status}
+            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+              Current state: <span style={{ textTransform: 'capitalize' }}>{activeCampaign.status}</span>
             </div>
           </div>
 
-          <div style={{ padding: '2.5rem 2rem', border: '1px solid var(--border)', borderRadius: '4px', background: 'white' }}>
+          <div className="db-card">
             <span className="label-muted">Still Needed</span>
             <div
               className="stat-value"
               style={{
-                color: needed <= 0 ? 'var(--primary)' : '#DC2626',
-                fontSize: 'clamp(2rem, 5vw, 3.5rem)',
-                marginBottom: '1rem'
+                color: needed <= 0 ? 'var(--primary-vibrant)' : '#DC2626',
+                marginBottom: '0.5rem',
+                fontSize: '3rem'
               }}
             >
               ₦{needed.toLocaleString()}
             </div>
-            <div className="label-massive" style={{ fontSize: '0.75rem' }}>
-              to reach ₦{activeCampaign.targetAmount.toLocaleString()} goal
+            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+              Goal: ₦{activeCampaign.targetAmount.toLocaleString()}
             </div>
           </div>
         </section>
 
-        {/* Main Grid: Progress + Recent Activity */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '6rem' }} className="dashboard-grid">
-          <style>{`
-            @media (min-width: 1024px) {
-              .dashboard-grid { grid-template-columns: 1fr 1fr !important; }
-            }
-          `}</style>
-
-          {/* Progress Section */}
-          <section>
-            <h3 className="underline-accent" style={{ fontSize: '1.5rem', marginBottom: '3rem' }}>
-              Progress to Goal
+        <div className="db-main-grid">
+          <section className="db-card" style={{ textAlign: 'center', padding: '5rem 3rem' }}>
+            <h3 className="underline-accent" style={{ fontSize: '1.25rem', marginBottom: '4rem', display: 'inline-block' }}>
+              Impact Momentum
             </h3>
-            <div style={{ background: 'white', padding: '4rem', border: '1px solid var(--border)', borderRadius: '4px', textAlign: 'center' }}>
-              <div className="stat-value" style={{ fontSize: '5rem', marginBottom: '2rem' }}>
+            <div style={{ position: 'relative', marginBottom: '3rem' }}>
+              <div className="stat-value" style={{ fontSize: '8rem', marginBottom: '1.5rem', color: 'var(--primary-dark)', lineHeight: 1 }}>
                 {Math.min(percent, 100)}%
               </div>
-              <div className="progress-bar-thin" style={{ height: '6px', marginBottom: '2rem' }}>
-                <div className="progress-fill-thin" style={{ width: `${Math.min(percent, 100)}%`, height: '100%' }} />
-              </div>
-              <p style={{ fontWeight: 700, color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                ₦{needed.toLocaleString()} to completion
-              </p>
-              {percent >= 100 && <p style={{ color: 'var(--primary)', fontWeight: 800 }}>🎉 Goal Reached!</p>}
             </div>
+            <div className="progress-bar-thin" style={{ height: '12px', background: '#F2F5F8', borderRadius: 'var(--radius-pill)', marginBottom: '2.5rem', overflow: 'hidden' }}>
+              <div 
+                style={{ 
+                  width: `${Math.min(percent, 100)}%`, 
+                  height: '100%', 
+                  background: 'var(--primary-vibrant)',
+                  borderRadius: 'var(--radius-pill)',
+                  transition: 'width 1s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                }} 
+              />
+            </div>
+            <p style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-muted)' }}>
+              ₦{needed.toLocaleString()} remaining to hit target
+            </p>
+            {percent >= 100 && (
+              <div className="fade-in" style={{ color: 'var(--primary-vibrant)', fontWeight: 900, marginTop: '1.5rem', fontSize: '1.2rem' }}>
+                🎉 GOAL ACHIEVED
+              </div>
+            )}
           </section>
 
-          {/* Recent Activity Section */}
           <section>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
               <h3 className="underline-accent" style={{ fontSize: '1.5rem' }}>
                 Recent Donations
               </h3>
               {isLive && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.9rem', fontWeight: 800, color: 'var(--primary)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.9rem', fontWeight: 800, color: 'var(--primary-vibrant)' }}>
                   <span className="pulse-dot" style={{ margin: 0 }}></span> LIVE
                 </div>
               )}
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
               {recentDonations && recentDonations.length > 0 ? (
                 recentDonations.map((donation, idx) => (
-                  <div
-                    key={idx}
-                    className="fade-in"
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      paddingBottom: '1.5rem',
-                      borderBottom: '1px solid var(--border)'
-                    }}
-                  >
+                  <div key={idx} className="db-list-item">
                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                      <div
-                        style={{
-                          width: '48px',
-                          height: '48px',
-                          background: '#EEE',
-                          borderRadius: '50%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontWeight: 800
-                        }}
-                      >
+                      <div className="avatar-md">
                         {(donation.donorName || 'A')[0].toUpperCase()}
                       </div>
                       <div>
@@ -429,29 +398,31 @@ export default function BeneficiaryDashboard({ user, onLogout }) {
                           {donation.donorName || 'Anonymous Donor'}
                         </div>
                         <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                          {new Date(donation.date).toLocaleDateString()}
+                          {new Date(donation.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                         </div>
                       </div>
                     </div>
-                    <div style={{ fontWeight: 800, fontSize: '1.25rem', color: 'var(--primary)' }}>
+                    <div style={{ fontWeight: 800, fontSize: '1.25rem', color: 'var(--primary-vibrant)' }}>
                       ₦{(donation.amount || 0).toLocaleString()}
                     </div>
                   </div>
                 ))
               ) : (
-                <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>
-                  No donations yet. Share your campaign!
+                <div className="db-card" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '4rem' }}>
+                  No donations yet. Share your campaign to start receiving support!
                 </div>
               )}
             </div>
           </section>
         </div>
 
-        {/* Withdrawal CTA */}
-        <div style={{ marginTop: '8rem', textAlign: 'center' }}>
-          <button onClick={handleWithdrawal} className="btn btn-primary btn-lg" style={{ minWidth: '320px' }}>
-            Request Withdrawal
+        <div style={{ marginTop: '10rem', textAlign: 'center' }}>
+          <button onClick={handleWithdrawal} className="btn btn-primary btn-lg" style={{ minWidth: '340px', padding: '1.5rem' }}>
+            Request Funds Withdrawal
           </button>
+          <p style={{ marginTop: '1.5rem', fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+            Withdrawals are processed every Tuesday and Thursday.
+          </p>
         </div>
       </div>
     </div>

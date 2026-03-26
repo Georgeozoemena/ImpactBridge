@@ -126,27 +126,18 @@ export default function CampaignDetail({ onDonate, onBack }) {
         <div className="container" style={{ width: '100%', position: 'relative', zIndex: 2 }}>
           <button
             onClick={() => (onBack ? onBack() : navigate('/'))}
+            className="nav-btn-circle"
             style={{
               position: 'absolute',
-              top: '-180px',
+              top: '-200px',
               left: '0',
-              background: 'white',
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              border: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 900,
-              cursor: 'pointer'
             }}
           >
             ←
           </button>
           <div style={{ paddingBottom: '2rem', maxWidth: '800px' }}>
             {beneficiaryDisplay && (
-              <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--primary)', background: 'white', padding: '0.5rem 1rem', borderRadius: '4px', marginBottom: '1rem', display: 'inline-block' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--primary)', background: 'white', padding: '0.6rem 1.25rem', borderRadius: 'var(--radius-pill)', marginBottom: '1.25rem', display: 'inline-block', textTransform: 'uppercase', letterSpacing: '0.05em', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
                 For: {beneficiaryDisplay}
               </span>
             )}
@@ -222,62 +213,69 @@ export default function CampaignDetail({ onDonate, onBack }) {
             )}
           </div>
 
-          {/* Donation Card */}
-          <aside className="campaign-actions" style={{ position: 'sticky', top: '2rem' }}>
-            <div style={{ background: 'white', padding: '4rem 3rem', border: '1px solid var(--border)', borderRadius: '4px' }}>
+          <aside className="campaign-actions" style={{ position: 'sticky', top: '100px' }}>
+            <div style={{ background: 'white', padding: '3.5rem 2.5rem', border: '1.5px solid var(--border)', borderRadius: 'var(--radius-lg)' }}>
               {/* Amount Raised */}
-              <div style={{ marginBottom: '4rem' }}>
-                <span className="label-muted">Raised so far</span>
-                <div className="stat-value" style={{ color: 'var(--primary)', marginBottom: '1rem' }}>
+              <div style={{ marginBottom: '3.5rem' }}>
+                <span className="label-muted" style={{ marginBottom: '0.75rem' }}>Amount Raised</span>
+                <div className="stat-value" style={{ color: 'var(--text-main)', fontSize: '3.5rem', marginBottom: '0.5rem' }}>
                   ₦{raised.toLocaleString()}
                 </div>
-                <div style={{ fontSize: '1.125rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                <div style={{ fontSize: '1rem', color: 'var(--text-muted)', fontWeight: 600 }}>
                   Goal: ₦{target.toLocaleString()}
                 </div>
               </div>
 
               {/* Progress Bar */}
-              <div className="progress-bar-thin" style={{ marginBottom: '2rem', height: '6px' }}>
-                <div
-                  className="progress-fill-thin"
-                  style={{
-                    width: `${Math.min(percent, 100)}%`,
-                    height: '100%'
-                  }}
-                />
+              <div style={{ marginBottom: '2.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 800 }}>
+                  <span>Progress</span>
+                  <span style={{ color: 'var(--primary)' }}>{percent}%</span>
+                </div>
+                <div style={{ height: '8px', background: '#F2F5F8', borderRadius: 'var(--radius-pill)' }}>
+                  <div
+                    style={{
+                      width: `${Math.min(percent, 100)}%`,
+                      height: '100%',
+                      background: 'var(--primary)',
+                      borderRadius: 'var(--radius-pill)'
+                    }}
+                  />
+                </div>
               </div>
 
               {/* Donor Count */}
-              <div style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '4rem', color: 'var(--text-main)' }}>
-                {donorCount} supporters have joined
+              <div style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '3.5rem', color: 'var(--text-muted)' }}>
+                {donorCount} people have contributed
               </div>
 
               {/* Donate Button */}
               <button
                 className="btn btn-primary btn-lg"
-                style={{ width: '100%', marginBottom: '1rem' }}
+                style={{ width: '100%', marginBottom: '1.25rem', fontSize: '1.1rem' }}
                 onClick={() => onDonate(campaign._id || campaign.id)}
               >
-                Donate — Save a Life
+                Donate Now
               </button>
 
               <button
                 className="btn btn-outline btn-lg"
-                style={{ width: '100%' }}
+                style={{ width: '100%', padding: '1rem' }}
                 onClick={() => {
+                  const url = window.location.href;
                   if (navigator.share) {
                     navigator.share({
                       title: campaign.title,
                       text: `Help support this campaign: ${campaign.title}`,
-                      url: window.location.href
+                      url: url
                     });
                   } else {
-                    navigator.clipboard.writeText(window.location.href);
+                    navigator.clipboard.writeText(url);
                     alert('Link copied to clipboard!');
                   }
                 }}
               >
-                Support — Share Cause
+                Share
               </button>
 
               {/* Goal Completion Message */}
