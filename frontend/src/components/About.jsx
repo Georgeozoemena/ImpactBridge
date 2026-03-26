@@ -1,4 +1,5 @@
 import React from 'react';
+import { getHealthFallback } from '../utils/visuals';
 
 export default function About() {
   return (
@@ -19,7 +20,7 @@ export default function About() {
         {/* Our Story */}
         <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '6rem', marginBottom: '10rem', alignItems: 'center' }}>
           <div style={{ borderRadius: '12px', overflow: 'hidden', aspectRatio: '4/5', background: '#EEE' }}>
-            <img src="https://images.unsplash.com/photo-1576091160550-217359f47bf4?auto=format&fit=crop&q=80&w=800" alt="Medical Care" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={getHealthFallback('about')} alt="Medical Care" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
           <div>
             <span className="label-muted">Our Story</span>

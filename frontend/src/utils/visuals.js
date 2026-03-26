@@ -1,12 +1,7 @@
 const HEALTH_IMAGES = [
-  '1532938911036-79b124682110', // Patient in recovery
-  '1585485496744-ed11003d82d4', // Child patient / Care
-  '1581056344407-5cd60c637a11', // Elderly care
-  '1579684385109-c169224d83e3', // Interaction with caregiver
-  '1581595221027-33141bd1d68a', // Support / Holding hands
-  '1527613426441-4da1d271701d', // Medical attention
-  '1584362940241-7928230559ec', // Patient care
-  '1516570161789-db40af706b2a'  // Pediatric care
+  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800"><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="%23f4efe9"/><stop offset="1" stop-color="%23e6f2ed"/></linearGradient></defs><rect width="1200" height="800" fill="url(%23g)"/><circle cx="220" cy="220" r="140" fill="%23cfe6dc"/><circle cx="980" cy="140" r="120" fill="%23f2d9c9"/><rect x="120" y="420" width="960" height="220" rx="32" fill="%23ffffff" opacity="0.6"/></svg>',
+  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800"><defs><linearGradient id="g" x1="0" x2="1" y1="1" y2="0"><stop offset="0" stop-color="%23f7f2ec"/><stop offset="1" stop-color="%23e8f0f7"/></linearGradient></defs><rect width="1200" height="800" fill="url(%23g)"/><circle cx="180" cy="620" r="160" fill="%23d6e7f5"/><circle cx="920" cy="280" r="150" fill="%23f1e1d3"/><rect x="140" y="160" width="920" height="260" rx="32" fill="%23ffffff" opacity="0.6"/></svg>',
+  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800"><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="%23f3f7f4"/><stop offset="1" stop-color="%23f7ede5"/></linearGradient></defs><rect width="1200" height="800" fill="url(%23g)"/><circle cx="260" cy="200" r="130" fill="%23e0efe6"/><circle cx="930" cy="600" r="170" fill="%23f3dac8"/><rect x="160" y="300" width="880" height="220" rx="32" fill="%23ffffff" opacity="0.6"/></svg>'
 ];
 
 export const getHealthFallback = (id = 'default') => {
@@ -16,7 +11,7 @@ export const getHealthFallback = (id = 'default') => {
     hash = id.charCodeAt(i) + ((hash << 5) - hash);
   }
   const index = Math.abs(hash) % HEALTH_IMAGES.length;
-  return `https://images.unsplash.com/photo-${HEALTH_IMAGES[index]}?auto=format&fit=crop&q=80&w=800`;
+  return HEALTH_IMAGES[index];
 };
 
 export const parseBeneficiaryName = (description) => {
