@@ -281,7 +281,26 @@ export default function Landing({ onDonate, onStartCampaign }) {
             <div className="label-massive">Lives Saved Today</div>
           </div>
         </section>
+
       </div>
+
+      <section className="bg-dark edge-to-edge" style={{ textAlign: 'center', padding: '8rem 0', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+        <div className="container">
+          <p style={{ fontSize: '0.9rem', fontWeight: 800, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '3rem' }}>
+            Trusted Transaction Partner
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
+            <img 
+              src="/interswitch-white.png" 
+              alt="Interswitch" 
+              style={{ height: '80px', width: 'auto' }} 
+            />
+            <p style={{ maxWidth: '600px', fontSize: '1.25rem', color: 'rgba(255,255,255,0.8)', lineHeight: 1.6, fontWeight: 500 }}>
+              All donations are securely processed and verified via the <span style={{ color: 'var(--accent-lime)', fontWeight: 800 }}>Interswitch Payment Gateway</span>, ensuring 100% security and real-time fund tracking.
+            </p>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

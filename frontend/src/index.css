@@ -73,6 +73,10 @@ h3,
   line-height: 1;
 }
 
+.bg-dark {
+  background-color: var(--primary-dark) !important;
+}
+
 .underline-accent {
   position: relative;
   display: inline-block;
