@@ -160,6 +160,15 @@ export const api = {
     return response.data;
   },
 
+  // POST /api/donation/verify - Verify donation by transaction reference
+  verifyDonation: async (transactionReference, amount) => {
+    const response = await apiInstance.post('/donation/verify', {
+      transactionReference,
+      amount
+    });
+    return response.data;
+  },
+
   // GET /api/donation/receipt/:donationId - Get receipt PDF URL
   getReceiptUrl: (donationId) => {
     return `${API_BASE_URL}/donation/receipt/${donationId}`;

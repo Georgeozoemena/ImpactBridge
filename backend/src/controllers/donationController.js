@@ -194,6 +194,89 @@ const verifyDonationTest = async (req, res) => {
   return res.ok({ verification });
 };
 
+const verifyDonation = async (req, res) => {
+  const { transactionReference, amount } = req.body;
+  const numericAmount = Number(amount);
+
+  if (!transactionReference || !numericAmount) {
+    return res.fail("transactionReference and amount are required", 400);
+  }
+
+  const donation = await Donation.findOne({ transactionRef: transactionReference });
+  if (!donation) {
+    return res.fail("Donation not found for transactionReference", 404);
+  }
+
+  if (donation.status === "verified") {
+    const campaign = await Campaign.findById(donation.campaignId).lean();
+    const percent = campaign
+      ? Math.min(100, Math.round((campaign.raisedAmount / campaign.targetAmount) * 100))
+      : 0;
+    return res.ok({
+      message: "Donation already verified",
+      donation,
+      newPercent: percent
+    });
+  }
+
+  const amountKobo = Math.round(numericAmount * 100);
+  const verification = await verifyPayment({ transactionReference, amountKobo });
+
+  if (!verification.verified) {
+    donation.status = "failed";
+    await donation.save();
+    return res.fail("Payment verification failed", 402);
+  }
+
+  donation.status = "verified";
+  donation.transactionRef = verification.transactionRef;
+  donation.verifiedAt = verification.paidAt;
+  await donation.save();
+
+  const campaign = await Campaign.findById(donation.campaignId);
+  if (campaign) {
+    campaign.raisedAmount += donation.amount;
+    campaign.donorCount += 1;
+    await campaign.save();
+  }
+
+  let io;
+  try {
+    io = getIo();
+  } catch (_err) {
+    io = null;
+  }
+
+  if (io && campaign) {
+    io.to(`campaign:${campaign._id}`).emit("campaignProgress", {
+      campaignId: campaign._id,
+      raisedAmount: campaign.raisedAmount,
+      targetAmount: campaign.targetAmount,
+      donorCount: campaign.donorCount,
+      percentComplete: Math.min(
+        100,
+        Math.round((campaign.raisedAmount / campaign.targetAmount) * 100)
+      )
+    });
+
+    io.to(`campaign:${campaign._id}`).emit("donationReceived", {
+      donorName: donation.donorName,
+      amount: donation.amount,
+      date: donation.createdAt
+    });
+  }
+
+  const newPercent = campaign
+    ? Math.min(100, Math.round((campaign.raisedAmount / campaign.targetAmount) * 100))
+    : 0;
+
+  return res.ok({
+    message: "Donation verified",
+    donation,
+    newPercent
+  });
+};
+
 const getReceipt = async (req, res) => {
   const donation = await Donation.findById(req.params.donationId).lean();
   if (!donation) {
@@ -250,4 +333,4 @@ const getDonorHistory = async (req, res) => {
   });
 };
 
-module.exports = { processDonation, initiateDonation, initiateDonationTest, verifyDonationTest, getReceipt, getDonorHistory };
+module.exports = { processDonation, initiateDonation, initiateDonationTest, verifyDonationTest, verifyDonation, getReceipt, getDonorHistory };
