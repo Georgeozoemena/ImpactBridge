@@ -45,6 +45,28 @@ app.get("/", (_req, res) => {
 
 app.all("/payment/callback", (req, res) => {
   const payload = { ...req.query, ...req.body };
+  const frontendUrl = process.env.FRONTEND_URL;
+  const txnRef =
+    payload.txn_ref ||
+    payload.txnref ||
+    payload.transaction_ref ||
+    payload.reference ||
+    payload.ref;
+
+  if (frontendUrl) {
+    try {
+      const base = frontendUrl.replace(/\/+$/, "");
+      const redirectUrl = new URL(`${base}/payment/callback`);
+      if (txnRef) redirectUrl.searchParams.set("txn_ref", txnRef);
+      if (payload.amount) redirectUrl.searchParams.set("amount", payload.amount);
+      if (payload.resp) redirectUrl.searchParams.set("resp", payload.resp);
+      if (payload.payRef) redirectUrl.searchParams.set("payRef", payload.payRef);
+      return res.redirect(302, redirectUrl.toString());
+    } catch (err) {
+      console.error("Callback redirect failed:", err);
+    }
+  }
+
   const data = JSON.stringify(payload, null, 2);
   res.setHeader("Content-Type", "text/html");
   res.send(
