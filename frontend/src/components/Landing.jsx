@@ -107,10 +107,10 @@ export default function Landing({ onDonate, onStartCampaign }) {
               <p className="hero-reveal hero-subtext">
                 ImpactBridge removes the middleman between compassion and care. Directly fund surgeries and treatments for Nigerians in need with 100% transparency.
               </p>
-              <div className="hero-reveal" style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', marginBottom: '2rem' }}>
-                <button className="btn btn-primary btn-lg" onClick={() => onDonate()}>Donate Now</button>
-                <button className="btn btn-outline btn-lg" onClick={onStartCampaign}>Start a Campaign</button>
-              </div>
+            <div className="hero-actions hero-reveal">
+              <button className="btn btn-primary btn-lg" onClick={() => onDonate()}>Donate Now</button>
+              <button className="btn btn-outline btn-lg" onClick={onStartCampaign}>Start a Campaign</button>
+            </div>
               <div className="hero-reveal" style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>
                 <div style={{ display: 'flex', marginLeft: '0.5rem' }}>
                   {[1, 2, 3].map(i => (
