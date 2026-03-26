@@ -41,6 +41,10 @@ app.get("/health", (_req, res) => {
   res.ok({ status: "ok", name: "ImpactBridge API" });
 });
 
+app.get("/", (_req, res) => {
+  res.ok({ status: "ok", name: "ImpactBridge API", message: "Use /health for status checks." });
+});
+
 app.all("/payment/callback", (req, res) => {
   const payload = { ...req.query, ...req.body };
   const data = JSON.stringify(payload, null, 2);
