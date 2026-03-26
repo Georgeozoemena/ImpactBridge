@@ -30,10 +30,12 @@ export default function DonationModal({ campaignId, onClose, onSuccess, benefici
 
     setLoading(true);
     try {
+      const backendBase = api.getBaseUrl().replace(/\/api\/?$/, '');
+      const callbackUrl = `${backendBase}/payment/callback`;
       const response = await api.initiateDonation(
         campaignId,
         amount,
-        `${window.location.origin}/payment/callback`,
+        callbackUrl,
         email
       );
 
