@@ -100,6 +100,12 @@ export default function CampaignDetail({ onDonate, onBack }) {
     );
   }
 
+  const campId = campaign._id || campaign.id;
+  const localImages = JSON.parse(localStorage.getItem(`campaign_images_${campId}`) || '[]');
+  const localBeneficiary = localStorage.getItem(`campaign_beneficiary_${campId}`);
+  const beneficiaryDisplay = campaign.beneficiaryName || localBeneficiary;
+  const displayImage = localImages.length > 0 ? localImages[0] : (campaign.imageUrl || 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=1200');
+
   const raised = campaign.raisedAmount || 0;
   const target = campaign.targetAmount || 1;
   const percent = Math.round((raised / target) * 100);
@@ -111,9 +117,7 @@ export default function CampaignDetail({ onDonate, onBack }) {
       <div
         className="hero-full"
         style={{
-          backgroundImage: `url(${
-            campaign.imageUrl || 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=1200'
-          })`,
+          backgroundImage: `url(${displayImage})`,
           height: 'clamp(300px, 40vh, 500px)',
           alignItems: 'flex-end'
         }}
@@ -139,9 +143,16 @@ export default function CampaignDetail({ onDonate, onBack }) {
           >
             ←
           </button>
-          <h2 className="hero-text" style={{ paddingBottom: '2rem', maxWidth: '800px' }}>
-            {campaign.title}
-          </h2>
+          <div style={{ paddingBottom: '2rem', maxWidth: '800px' }}>
+            {beneficiaryDisplay && (
+              <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--primary)', background: 'white', padding: '0.5rem 1rem', borderRadius: '4px', marginBottom: '1rem', display: 'inline-block' }}>
+                For: {beneficiaryDisplay}
+              </span>
+            )}
+            <h2 className="hero-text">
+              {campaign.title}
+            </h2>
+          </div>
         </div>
       </div>
 
@@ -243,10 +254,29 @@ export default function CampaignDetail({ onDonate, onBack }) {
               {/* Donate Button */}
               <button
                 className="btn btn-primary btn-lg"
-                style={{ width: '100%' }}
+                style={{ width: '100%', marginBottom: '1rem' }}
                 onClick={() => onDonate(campaign._id || campaign.id)}
               >
                 Donate — Save a Life
+              </button>
+
+              <button
+                className="btn btn-outline btn-lg"
+                style={{ width: '100%' }}
+                onClick={() => {
+                  if (navigator.share) {
+                    navigator.share({
+                      title: campaign.title,
+                      text: `Help support this campaign: ${campaign.title}`,
+                      url: window.location.href
+                    });
+                  } else {
+                    navigator.clipboard.writeText(window.location.href);
+                    alert('Link copied to clipboard!');
+                  }
+                }}
+              >
+                Support — Share Cause
               </button>
 
               {/* Goal Completion Message */}

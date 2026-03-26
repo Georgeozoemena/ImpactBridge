@@ -1,4 +1,13 @@
-export default function SuccessScreen({ amount, campaignTitle, newPercent, onFinish }) {
+import { useLocation } from 'react-router-dom';
+
+export default function SuccessScreen({ amount: propAmount, campaignTitle: propTitle, newPercent: propPercent, onFinish }) {
+  const location = useLocation();
+  const { amount: stateAmount, title: stateTitle, newPercent: statePercent } = location.state || {};
+  
+  const amount = stateAmount || propAmount || 0;
+  const campaignTitle = stateTitle || propTitle || 'the';
+  const newPercent = statePercent || propPercent || 0;
+
   return (
     <div className="fade-in">
       <div className="container" style={{ padding: '8rem 1.5rem', textAlign: 'center', maxWidth: '800px' }}>
@@ -9,7 +18,7 @@ export default function SuccessScreen({ amount, campaignTitle, newPercent, onFin
         </h2>
         
         <p style={{ fontSize: '1.25rem', color: 'var(--text-muted)', marginBottom: '5rem', lineHeight: 1.8 }}>
-          Your contribution of ₦{amount.toLocaleString()} moved {campaignTitle || 'the'} campaign to <span style={{ fontWeight: 800, color: 'var(--text-main)' }}>{newPercent || 'a new'}% funded.</span>
+          Your contribution of ₦{amount.toLocaleString()} moved {campaignTitle} campaign to <span style={{ fontWeight: 800, color: 'var(--text-main)' }}>{newPercent}% funded.</span>
         </p>
 
         <div style={{ background: 'white', padding: '4rem 2rem', border: '1px solid var(--border)', borderRadius: '4px', marginBottom: '5rem' }}>

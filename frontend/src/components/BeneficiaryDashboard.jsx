@@ -217,6 +217,9 @@ export default function BeneficiaryDashboard({ user, onLogout }) {
             <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)' }}>Campaign: {activeCampaign.title}</p>
           </div>
           <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+            <button onClick={() => setShowCreate(true)} className="btn btn-outline">
+              + Create New
+            </button>
             <button onClick={() => setShowSettings(true)} className="btn btn-primary">
               Campaign Settings
             </button>

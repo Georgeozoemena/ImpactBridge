@@ -86,6 +86,12 @@ export default function CampaignExplorer({ onDonate }) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '3rem' }}>
             {filtered.length > 0 ? (
               filtered.map((campaign) => {
+                const campId = campaign._id || campaign.id;
+                const localImages = JSON.parse(localStorage.getItem(`campaign_images_${campId}`) || '[]');
+                const localBeneficiary = localStorage.getItem(`campaign_beneficiary_${campId}`);
+                const beneficiaryDisplay = campaign.beneficiaryName || localBeneficiary;
+                const displayImage = localImages.length > 0 ? localImages[0] : (campaign.imageUrl || `https://picsum.photos/seed/${campId}/800/600`);
+
                 // Use backend field names: raisedAmount, targetAmount, donorCount
                 const raised = campaign.raisedAmount || 0;
                 const target = campaign.targetAmount || 1;
@@ -94,7 +100,7 @@ export default function CampaignExplorer({ onDonate }) {
 
                 return (
                   <div
-                    key={campaign._id || campaign.id}
+                    key={campId}
                     className="card"
                     style={{
                       display: 'flex',
@@ -107,7 +113,7 @@ export default function CampaignExplorer({ onDonate }) {
                       borderRadius: 0
                     }}
                   >
-                    {/* Campaign Image Placeholder */}
+                    {/* Campaign Image */}
                     <div
                       style={{
                         background: '#F5F5F5',
@@ -120,16 +126,17 @@ export default function CampaignExplorer({ onDonate }) {
                         overflow: 'hidden'
                       }}
                     >
-                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#AAA', fontWeight: 700 }}>
-                        {campaign.imageUrl ? (
-                          <img src={campaign.imageUrl} alt={campaign.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        ) : (
-                          'Campaign Visual'
-                        )}
-                      </div>
+                      <img src={displayImage} alt={campaign.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, paddingBottom: '2rem' }}>
+                      {/* Beneficiary Name */}
+                      {beneficiaryDisplay && (
+                        <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--primary)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
+                          For: {beneficiaryDisplay}
+                        </div>
+                      )}
+                      
                       {/* Campaign Title */}
                       <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-0.01em' }}>
                         {campaign.title}

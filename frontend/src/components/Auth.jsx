@@ -19,7 +19,7 @@ export default function Auth({ onAuth, onCancel }) {
 
     try {
       let response;
-      
+
       if (isLogin) {
         // Login flow - same for both roles
         response = await api.login(email, password);

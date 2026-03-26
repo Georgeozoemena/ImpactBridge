@@ -14,19 +14,19 @@ export default function Navbar({ onNavigate, user }) {
           <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('/'); }}>Campaigns</a>
           <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('/transparency'); }}>Transparency</a>
           <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); onNavigate('/about'); }}>About</a>
-          
+
           <div className="nav-actions">
             {!user ? (
               <>
-                <button 
-                  className="btn btn-outline" 
+                <button
+                  className="btn btn-outline"
                   style={{ padding: '0.6rem 1.5rem', fontSize: '0.85rem' }}
                   onClick={() => onNavigate('/auth')}
                 >
                   Sign In
                 </button>
-                <button 
-                  className="btn btn-primary" 
+                <button
+                  className="btn btn-primary"
                   style={{ padding: '0.6rem 1.5rem', fontSize: '0.85rem' }}
                   onClick={() => onNavigate('/')}
                 >
@@ -34,8 +34,8 @@ export default function Navbar({ onNavigate, user }) {
                 </button>
               </>
             ) : (
-              <button 
-                className="btn btn-primary" 
+              <button
+                className="btn btn-primary"
                 style={{ padding: '0.6rem 1.5rem', fontSize: '0.85rem' }}
                 onClick={() => onNavigate('/dashboard')}
               >

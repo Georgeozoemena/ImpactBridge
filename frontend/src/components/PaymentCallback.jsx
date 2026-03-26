@@ -44,10 +44,12 @@ export default function PaymentCallback() {
           localStorage.removeItem('pendingDonation');
           // Navigate to success screen with data from response or localStorage
           const amount = response.donation?.amount || pendingDonation.amount || 0;
+          const title = response.campaignTitle || pendingDonation.campaignTitle || 'the';
+          const newPercent = response.newPercent || response.donation?.newPercent || 0;
           
           // Small delay for UX
           setTimeout(() => {
-            navigate('/success', { state: { amount } });
+            navigate('/success', { state: { amount, title, newPercent } });
           }, 1500);
         } else {
           throw new Error(response?.message || 'Verification failed');

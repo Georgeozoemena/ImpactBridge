@@ -19,6 +19,7 @@ export default function App() {
   const [activeCampaignId, setActiveCampaignId] = useState(null);
   const [lastDonationAmount, setLastDonationAmount] = useState(0);
   const [successData, setSuccessData] = useState({ title: '', percent: 0 });
+  const [beneficiaryName, setBeneficiaryName] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -64,8 +65,23 @@ export default function App() {
     navigate('/success');
   };
 
-  const openDonation = (campaignId) => {
+  const openDonation = async (campaignId) => {
     setActiveCampaignId(campaignId);
+    setBeneficiaryName(''); // Reset
+    
+    // Fetch beneficiary name
+    try {
+      const localName = localStorage.getItem(`campaign_beneficiary_${campaignId}`);
+      if (localName) {
+        setBeneficiaryName(localName);
+      } else {
+        const detail = await api.getCampaignById(campaignId);
+        setBeneficiaryName(detail.beneficiaryName || detail.campaign?.beneficiaryName || '');
+      }
+    } catch (e) {
+      console.warn("Could not fetch beneficiary name for modal", e);
+    }
+    
     setShowDonationFlow(true);
   };
 
@@ -98,6 +114,7 @@ export default function App() {
       {showDonationFlow && (
         <DonationModal 
           campaignId={activeCampaignId} 
+          beneficiaryName={beneficiaryName}
           onClose={() => setShowDonationFlow(false)}
           onSuccess={handleDonationSuccess}
         />

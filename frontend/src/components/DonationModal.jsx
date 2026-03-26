@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import Notification from './Notification';
 
-export default function DonationModal({ campaignId, onClose, onSuccess }) {
+export default function DonationModal({ campaignId, onClose, onSuccess, beneficiaryName }) {
   const [stage, setStage] = useState('form'); // 'form', 'payment', 'redirecting'
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState(5000);
@@ -38,12 +38,22 @@ export default function DonationModal({ campaignId, onClose, onSuccess }) {
       );
 
       if (response.success && response.fields) {
+        // Fetch campaign details to get the title for the success screen
+        let campaignTitle = 'the';
+        try {
+          const detail = await api.getCampaignById(campaignId);
+          campaignTitle = detail.title || detail.campaign?.title || 'the';
+        } catch (e) {
+          console.warn("Failed to fetch campaign title for success flow", e);
+        }
+
         // Store Interswitch data for later
         setInterswitchData({
           paymentUrl: response.paymentUrl,
           fields: response.fields,
           transactionReference: response.transactionReference,
-          donationId: response.donationId
+          donationId: response.donationId,
+          campaignTitle: campaignTitle
         });
         setStage('payment');
       } else {
@@ -79,7 +89,8 @@ export default function DonationModal({ campaignId, onClose, onSuccess }) {
         email,
         donorName: isAnonymous ? 'Anonymous' : name,
         transactionReference: interswitchData.transactionReference,
-        donationId: interswitchData.donationId
+        donationId: interswitchData.donationId,
+        campaignTitle: interswitchData.campaignTitle // Assuming this is available or we should fetch it
       }));
 
       // In production: Create a hidden form and submit to Interswitch
@@ -154,7 +165,7 @@ export default function DonationModal({ campaignId, onClose, onSuccess }) {
             Choose your impact
           </h2>
           <p style={{ color: 'var(--text-muted)', marginBottom: '5rem', fontSize: '1.25rem' }}>
-            Every naira moves this patient closer to recovery
+            Every naira moves {beneficiaryName || 'this patient'} closer to recovery
           </p>
 
           {/* Quick Amount Buttons */}

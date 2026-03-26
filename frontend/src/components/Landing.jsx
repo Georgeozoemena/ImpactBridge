@@ -100,17 +100,29 @@ export default function Landing({ onDonate, onStartCampaign }) {
               <div style={{ padding: '4rem', textAlign: 'center', width: '100%' }}>Loading campaigns...</div>
             ) : campaigns.length === 0 ? (
               <div style={{ padding: '4rem', textAlign: 'center', width: '100%' }}>No active campaigns found.</div>
-            ) : campaigns.map((camp) => (
-              <div key={camp._id || camp.id} className="card-editorial" onClick={() => navigate(`/campaign/${camp._id || camp.id}`)} style={{ cursor: 'pointer' }}>
-                <div style={{ height: '300px', background: '#EEE', marginBottom: '2rem', borderRadius: '4px', overflow: 'hidden' }}>
-                  <img 
-                    src={`https://picsum.photos/seed/${camp._id || camp.id}/800/600`} 
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                    alt={camp.title} 
-                  />
-                </div>
-                <div className="pill-urgency" style={{ marginBottom: '1.5rem' }}>{camp.urgency || 'Urgent'}</div>
-                <h3 style={{ fontSize: '1.75rem', marginBottom: '1rem', lineHeight: 1.2 }}>{camp.title}</h3>
+            ) : campaigns.map((camp) => {
+              const campId = camp._id || camp.id;
+              const localImages = JSON.parse(localStorage.getItem(`campaign_images_${campId}`) || '[]');
+              const localBeneficiary = localStorage.getItem(`campaign_beneficiary_${campId}`);
+              const beneficiaryDisplay = camp.beneficiaryName || localBeneficiary;
+              const displayImage = localImages.length > 0 ? localImages[0] : (camp.imageUrl || `https://picsum.photos/seed/${campId}/800/600`);
+
+              return (
+                <div key={campId} className="card-editorial" onClick={() => navigate(`/campaign/${campId}`)} style={{ cursor: 'pointer' }}>
+                  <div style={{ height: '300px', background: '#EEE', marginBottom: '2rem', borderRadius: '4px', overflow: 'hidden' }}>
+                    <img 
+                      src={displayImage} 
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                      alt={camp.title} 
+                    />
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <div className="pill-urgency">{camp.urgency || 'Urgent'}</div>
+                    {beneficiaryDisplay && (
+                      <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--primary)' }}>For: {beneficiaryDisplay}</span>
+                    )}
+                  </div>
+                  <h3 style={{ fontSize: '1.75rem', marginBottom: '1rem', lineHeight: 1.2 }}>{camp.title}</h3>
                 
                 <div style={{ marginBottom: '1.5rem' }}>
                   <span style={{ fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--primary)' }}>The Narrative</span>
@@ -135,18 +147,41 @@ export default function Landing({ onDonate, onStartCampaign }) {
                   </div>
                 </div>
 
-                <button 
-                  className="btn btn-primary" 
-                  style={{ width: '100%', padding: '1rem' }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDonate(camp._id || camp.id);
-                  }}
-                >
-                  Donate to this Cause
-                </button>
-              </div>
-            ))}
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <button 
+                    className="btn btn-primary" 
+                    style={{ flex: 2, padding: '1rem' }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDonate(camp._id || camp.id);
+                    }}
+                  >
+                    Donate
+                  </button>
+                  <button 
+                    className="btn btn-outline" 
+                    style={{ flex: 1, padding: '1rem' }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const url = `${window.location.origin}/campaign/${camp._id || camp.id}`;
+                      if (navigator.share) {
+                        navigator.share({
+                          title: camp.title,
+                          text: `Help support this campaign: ${camp.title}`,
+                          url: url
+                        });
+                      } else {
+                        navigator.clipboard.writeText(url);
+                        alert('Link copied to clipboard!');
+                      }
+                    }}
+                  >
+                    Share
+                  </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
 
