@@ -3,7 +3,7 @@ import { api } from '../services/api';
 import Notification from './Notification';
 
 export default function DonationModal({ campaignId, onClose, onSuccess }) {
-  const [stage, setStage] = useState('form'); // 'form', 'payment', 'processing', 'success'
+  const [stage, setStage] = useState('form'); // 'form', 'payment', 'redirecting'
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState(5000);
   const [name, setName] = useState('');
@@ -11,7 +11,6 @@ export default function DonationModal({ campaignId, onClose, onSuccess }) {
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [notification, setNotification] = useState(null);
   const [interswitchData, setInterswitchData] = useState(null);
-  const [successData, setSuccessData] = useState(null);
 
   const quickAmounts = [1000, 5000, 10000, 50000];
 
@@ -39,7 +38,7 @@ export default function DonationModal({ campaignId, onClose, onSuccess }) {
       );
 
       if (response.success && response.fields) {
-        // Store Interswitch data for processing later
+        // Store Interswitch data for later
         setInterswitchData({
           paymentUrl: response.paymentUrl,
           fields: response.fields,
@@ -62,43 +61,58 @@ export default function DonationModal({ campaignId, onClose, onSuccess }) {
   };
 
   /**
-   * Step 2: Submit Interswitch form
-   * In a real scenario, this would submit to Interswitch
-   * For now, we'll process directly (simulating returned transaction reference)
+   * Step 2: Redirect to Interswitch for payment
+   * Saves donation context to localStorage before redirect
    */
   const handleSubmitPayment = async () => {
     if (!interswitchData) return;
 
     setLoading(true);
-    setStage('processing');
+    setStage('redirecting');
 
     try {
-      // In production: user would be redirected to Interswitch,
-      // and after payment, callback handler would process donation
-      // For MVP/demo with INTERSWITCH_STUB=true on backend:
-      const response = await api.processDonation(
+      // Save donation context to localStorage
+      // This will be retrieved by PaymentCallback component after redirect
+      localStorage.setItem('pendingDonation', JSON.stringify({
         campaignId,
         amount,
-        isAnonymous ? 'Anonymous' : name,
-        interswitchData.transactionReference
-      );
+        email,
+        donorName: isAnonymous ? 'Anonymous' : name,
+        transactionReference: interswitchData.transactionReference,
+        donationId: interswitchData.donationId
+      }));
 
-      if (response.success && response.donation) {
-        setSuccessData(response.donation);
-        setStage('success');
-        // Notify parent and redirect after brief delay
-        setTimeout(() => onSuccess(amount), 2000);
-      } else {
-        throw new Error('Payment verification failed');
-      }
+      // In production: Create a hidden form and submit to Interswitch
+      // For sandbox/demo: Redirect directly to paymentUrl with form data
+      
+      // Create a form element to submit Interswitch data
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = interswitchData.paymentUrl;
+      form.target = '_self';
+
+      // Add all Interswitch fields as hidden inputs
+      Object.keys(interswitchData.fields).forEach(key => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = interswitchData.fields[key];
+        form.appendChild(input);
+      });
+
+      // Append form to body and submit
+      document.body.appendChild(form);
+      form.submit();
+      
+      // Clean up
+      document.body.removeChild(form);
     } catch (err) {
-      console.error('Payment processing failed:', err);
+      console.error('Payment redirect failed:', err);
       setNotification({
-        message: err.response?.data?.message || 'Payment verification failed. Please try again.',
+        message: 'Failed to redirect to payment gateway. Please try again.',
         type: 'error'
       });
       setStage('payment');
-    } finally {
       setLoading(false);
     }
   };
@@ -302,11 +316,12 @@ export default function DonationModal({ campaignId, onClose, onSuccess }) {
             onClick={handleSubmitPayment}
             style={{ width: '100%', maxWidth: '500px', marginBottom: '1rem' }}
           >
-            {loading ? 'Processing...' : 'Complete Payment'}
+            {loading ? 'Redirecting to Interswitch...' : 'Complete Payment'}
           </button>
 
           <button
             className="btn btn-outline"
+            disabled={loading}
             onClick={() => setStage('form')}
             style={{ width: '100%', maxWidth: '500px' }}
           >
@@ -314,55 +329,28 @@ export default function DonationModal({ campaignId, onClose, onSuccess }) {
           </button>
 
           <p style={{ marginTop: '2rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            In production, you would be redirected to Interswitch Quickteller for secure payment.
+            You will be redirected to Interswitch Quickteller for secure payment.
           </p>
         </div>
       </div>
     );
   }
 
-  // ============= Processing Stage =============
-  if (stage === 'processing') {
+  // ============= Redirecting Stage =============
+  if (stage === 'redirecting') {
     return (
       <div className="modal-overlay">
         <div className="modal-content container fade-in" style={{ textAlign: 'center', padding: '5rem 2rem' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '2rem', animation: 'pulse 1.5s ease-in-out infinite' }}>⏳</div>
-          <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem' }}>Verifying payment...</h2>
+          <div style={{ fontSize: '3rem', marginBottom: '2rem', animation: 'spin 1s linear infinite' }}>🔄</div>
+          <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1rem' }}>Redirecting to Interswitch...</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>
-            Please wait while we confirm your transaction with Interswitch
+            Please do not close this page. You will be redirected to complete your payment securely.
           </p>
-        </div>
-      </div>
-    );
-  }
-
-  // ============= Success Stage =============
-  if (stage === 'success' && successData) {
-    return (
-      <div className="modal-overlay">
-        <div className="modal-content container fade-in" style={{ textAlign: 'center', padding: '5rem 2rem' }}>
-          <div style={{ fontSize: '5rem', marginBottom: '2rem' }}>🎉</div>
-          <h2 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '1.5rem' }}>Impact Confirmed.</h2>
-          <p style={{ color: 'var(--text-muted)', marginBottom: '4rem', fontSize: '1.25rem', lineHeight: 1.6 }}>
-            Thank you, <strong>{successData.donorName || 'Donor'}</strong>. Your contribution of ₦{successData.amount?.toLocaleString()} has
-            been verified and credited to the campaign.
-          </p>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '400px', margin: '0 auto' }}>
-            <a
-              href={api.getReceiptUrl(successData._id)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-primary"
-              style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}
-            >
-              <span>Download Receipt</span>
-              <span style={{ fontSize: '1.25rem' }}>↓</span>
-            </a>
-            <button onClick={onClose} className="btn btn-outline">
-              Return to Campaign
-            </button>
-          </div>
+          <style>{`
+            @keyframes spin {
+              to { transform: rotate(360deg); }
+            }
+          `}</style>
         </div>
       </div>
     );
