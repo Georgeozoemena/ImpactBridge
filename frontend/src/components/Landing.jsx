@@ -119,7 +119,7 @@ export default function Landing({ onDonate, onStartCampaign }) {
                     </div>
                   ))}
                 </div>
-                <span>Joined by 12,000+ donors this month</span>
+                <span>Live donor activity updates in real time</span>
               </div>
             </div>
 
