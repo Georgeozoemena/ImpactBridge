@@ -17,6 +17,5 @@ router.post("/initiate", auth, asyncHandler(initiateDonation));
 router.post("/initiate-test", asyncHandler(initiateDonationTest));
 router.post("/verify-test", asyncHandler(verifyDonationTest));
 router.get("/receipt/:donationId", requireValidId("donationId"), asyncHandler(getReceipt));
-router.get("/history", auth, asyncHandler(getDonorHistory));
 
 module.exports = router;
