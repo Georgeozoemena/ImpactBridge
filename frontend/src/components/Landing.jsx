@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
-import { getHealthFallback } from '../utils/visuals';
+import { getHealthFallback, parseBeneficiaryName } from '../utils/visuals';
 
 export default function Landing({ onDonate, onStartCampaign }) {
   const [campaigns, setCampaigns] = useState([]);
@@ -105,7 +105,7 @@ export default function Landing({ onDonate, onStartCampaign }) {
               const campId = camp._id || camp.id;
               const localImages = JSON.parse(localStorage.getItem(`campaign_images_${campId}`) || '[]');
               const localBeneficiary = localStorage.getItem(`campaign_beneficiary_${campId}`);
-              const beneficiaryDisplay = camp.beneficiaryName || localBeneficiary;
+              const beneficiaryDisplay = camp.beneficiaryName || parseBeneficiaryName(camp.description) || localBeneficiary;
               const displayImage = localImages.length > 0 ? localImages[0] : (camp.imageUrl || getHealthFallback(campId));
 
               return (

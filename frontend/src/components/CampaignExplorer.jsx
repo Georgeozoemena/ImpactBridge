@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../services/api';
-import { getHealthFallback } from '../utils/visuals';
+import { getHealthFallback, parseBeneficiaryName } from '../utils/visuals';
 
 export default function CampaignExplorer({ onDonate }) {
   const [campaigns, setCampaigns] = useState([]);
@@ -90,7 +90,7 @@ export default function CampaignExplorer({ onDonate }) {
                 const campId = campaign._id || campaign.id;
                 const localImages = JSON.parse(localStorage.getItem(`campaign_images_${campId}`) || '[]');
                 const localBeneficiary = localStorage.getItem(`campaign_beneficiary_${campId}`);
-                const beneficiaryDisplay = campaign.beneficiaryName || localBeneficiary;
+                const beneficiaryDisplay = campaign.beneficiaryName || parseBeneficiaryName(campaign.description) || localBeneficiary;
                 const displayImage = localImages.length > 0 ? localImages[0] : (campaign.imageUrl || getHealthFallback(campId));
 
                 // Use backend field names: raisedAmount, targetAmount, donorCount

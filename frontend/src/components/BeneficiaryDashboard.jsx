@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import CreateCampaign from './CreateCampaign';
 import Notification from './Notification';
+import { parseBeneficiaryName } from '../utils/visuals';
 
 export default function BeneficiaryDashboard({ user, onLogout }) {
   const navigate = useNavigate();
@@ -214,7 +215,14 @@ export default function BeneficiaryDashboard({ user, onLogout }) {
             <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 900, marginBottom: '0.5rem' }}>
               Hello, {user?.name || 'Beneficiary'}
             </h2>
-            <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)' }}>Campaign: {activeCampaign.title}</p>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)' }}>Campaign: {activeCampaign.title}</p>
+              {(activeCampaign.beneficiaryName || parseBeneficiaryName(activeCampaign.description)) && (
+                <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--primary)', background: '#F0F9FF', padding: '0.25rem 0.75rem', borderRadius: '4px' }}>
+                  For: {activeCampaign.beneficiaryName || parseBeneficiaryName(activeCampaign.description)}
+                </span>
+              )}
+            </div>
           </div>
           <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
             <button onClick={() => setShowCreate(true)} className="btn btn-outline">

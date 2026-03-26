@@ -50,10 +50,10 @@ export default function CreateCampaign({ onPublish, onCancel }) {
 
       const campaignData = {
         title,
-        description,
+        description: `Beneficiary: ${beneficiaryName}\n\n${description}`,
         targetAmount: Number(goal),
         deadline,
-        beneficiaryName // Include in payload
+        beneficiaryName
       };
       
       const response = await api.createCampaign(campaignData);
