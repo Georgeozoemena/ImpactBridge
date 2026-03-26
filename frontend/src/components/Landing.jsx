@@ -269,16 +269,22 @@ export default function Landing({ onDonate, onStartCampaign }) {
 
         <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '4rem', borderTop: '1px solid var(--border)', paddingTop: '8rem', paddingBottom: '10rem' }}>
           <div className="reveal-up">
-            <div className="stat-value">12.4k</div>
+            <div className="stat-value">
+              {campaigns.reduce((acc, c) => acc + (c.donorCount || 0), 0) > 1000 
+                ? (campaigns.reduce((acc, c) => acc + (c.donorCount || 0), 0) / 1000).toFixed(1) + 'k' 
+                : campaigns.reduce((acc, c) => acc + (c.donorCount || 0), 0)}
+            </div>
             <div className="label-massive">Empowered Donors</div>
           </div>
           <div className="reveal-up" style={{ animationDelay: '0.1s' }}>
-            <div className="stat-value">850</div>
+            <div className="stat-value">{campaigns.length}</div>
             <div className="label-massive">Medical Campaigns</div>
           </div>
           <div className="reveal-up" style={{ animationDelay: '0.2s' }}>
-            <div className="stat-value">2.1k</div>
-            <div className="label-massive">Lives Saved Today</div>
+            <div className="stat-value">
+              {campaigns.filter(c => (c.raisedAmount / c.targetAmount) >= 0.5).length}
+            </div>
+            <div className="label-massive">Lives Impacted</div>
           </div>
         </section>
 
