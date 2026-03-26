@@ -110,6 +110,7 @@ export default function CampaignDetail({ onDonate, onBack }) {
   const raised = campaign.raisedAmount || 0;
   const target = campaign.targetAmount || 1;
   const percent = Math.round((raised / target) * 100);
+  const percentCapped = Math.min(percent, 100);
   const donorCount = campaign.donorCount || 0;
 
   return (
@@ -235,12 +236,12 @@ export default function CampaignDetail({ onDonate, onBack }) {
               <div style={{ marginBottom: '2.5rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 800 }}>
                   <span>Progress</span>
-                  <span style={{ color: 'var(--primary)' }}>{percent}%</span>
-                </div>
-                <div style={{ height: '8px', background: '#F2F5F8', borderRadius: 'var(--radius-pill)' }}>
-                  <div
-                    style={{
-                      width: `${Math.min(percent, 100)}%`,
+                    <span style={{ color: 'var(--primary)' }}>{percentCapped}%</span>
+                  </div>
+                  <div style={{ height: '8px', background: '#F2F5F8', borderRadius: 'var(--radius-pill)' }}>
+                    <div
+                      style={{
+                      width: `${percentCapped}%`,
                       height: '100%',
                       background: 'var(--primary)',
                       borderRadius: 'var(--radius-pill)'
@@ -286,7 +287,7 @@ export default function CampaignDetail({ onDonate, onBack }) {
               {/* Goal Completion Message */}
               {percent >= 100 && (
                 <div style={{ marginTop: '2rem', padding: '1.5rem', background: '#f0fdf4', borderRadius: '4px', textAlign: 'center', color: '#22c55e', fontWeight: 800 }}>
-                  ✓ Goal Reached!
+                  Goal Reached
                 </div>
               )}
             </div>

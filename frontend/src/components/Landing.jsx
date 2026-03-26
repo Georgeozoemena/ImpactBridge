@@ -183,6 +183,10 @@ export default function Landing({ onDonate, onStartCampaign }) {
               const localBeneficiary = localStorage.getItem(`campaign_beneficiary_${campId}`);
               const beneficiaryDisplay = camp.beneficiaryName || parseBeneficiaryName(camp.description) || localBeneficiary;
               const displayImage = localImages.length > 0 ? localImages[0] : (camp.imageUrl || getHealthFallback(campId));
+              const raisedAmount = camp.raisedAmount || camp.current_amount || 0;
+              const targetAmount = camp.targetAmount || camp.goal_amount || 1;
+              const percent = Math.round((raisedAmount / targetAmount) * 100);
+              const percentCapped = Math.min(percent, 100);
 
               return (
                 <div key={campId} className="card-editorial" onClick={() => navigate(`/campaign/${campId}`)} style={{ cursor: 'pointer', background: 'var(--surface)' }}>
@@ -213,14 +217,14 @@ export default function Landing({ onDonate, onStartCampaign }) {
 
                   <div style={{ marginBottom: '2rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontSize: '0.85rem', fontWeight: 800 }}>
-                      <span>₦{(camp.raisedAmount || camp.current_amount || 0).toLocaleString()} raised</span>
-                      <span style={{ color: 'var(--primary)' }}>{Math.round(((camp.raisedAmount || camp.current_amount || 0) / (camp.targetAmount || camp.goal_amount || 1)) * 100)}%</span>
+                      <span>NGN {raisedAmount.toLocaleString()} raised</span>
+                      <span style={{ color: 'var(--primary)' }}>{percentCapped}%</span>
                     </div>
                     <div className="progress-bar-thin" style={{ height: '6px', background: '#E0E4E8', borderRadius: 'var(--radius-pill)', marginBottom: '0.5rem' }}>
                       <div
                         className="progress-fill-thin"
                         style={{
-                          width: `${Math.min(((camp.raisedAmount || camp.current_amount || 0) / (camp.targetAmount || camp.goal_amount || 1)) * 100, 100)}%`,
+                          width: `${percentCapped}%`,
                           height: '100%',
                           background: 'var(--primary)',
                           borderRadius: 'var(--radius-pill)'
@@ -228,7 +232,7 @@ export default function Landing({ onDonate, onStartCampaign }) {
                       />
                     </div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                      Goal: ₦{(camp.targetAmount || camp.goal_amount || 0).toLocaleString()}
+                      Goal: NGN {targetAmount.toLocaleString()}
                     </div>
                   </div>
 
