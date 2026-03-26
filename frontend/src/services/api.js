@@ -185,5 +185,11 @@ export const api = {
   getAllCampaigns: async () => {
     const response = await apiInstance.get('/campaigns/all');
     return response.data;
+  },
+
+  // GET /api/donation/history (requires auth)
+  getDonorHistory: async () => {
+    const response = await apiInstance.get('/donation/history');
+    return response.data;
   }
 };

@@ -7,6 +7,7 @@ const {
   initiateDonation,
   initiateDonationTest,
   verifyDonationTest,
+  getDonorHistory,
   getReceipt
 } = require("../controllers/donationController");
 
@@ -16,6 +17,7 @@ router.post("/process", auth, asyncHandler(processDonation));
 router.post("/initiate", auth, asyncHandler(initiateDonation));
 router.post("/initiate-test", asyncHandler(initiateDonationTest));
 router.post("/verify-test", asyncHandler(verifyDonationTest));
+router.get("/history", auth, asyncHandler(getDonorHistory));
 router.get("/receipt/:donationId", requireValidId("donationId"), asyncHandler(getReceipt));
 
 module.exports = router;

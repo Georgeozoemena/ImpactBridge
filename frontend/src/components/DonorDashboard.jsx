@@ -4,7 +4,6 @@ import { api } from '../services/api';
 
 export default function DonorDashboard({ user, onLogout }) {
   const navigate = useNavigate();
-  const [campaigns, setCampaigns] = useState([]);
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -18,36 +17,13 @@ export default function DonorDashboard({ user, onLogout }) {
       try {
         setLoading(true);
 
-        const campaignsResponse = await api.getCampaigns();
-        const campaignList = campaignsResponse.campaigns || campaignsResponse.data?.campaigns || [];
-        setCampaigns(campaignList);
-
-        let totalAmount = 0;
-        let uniqueCampaigns = new Set();
-        const donationList = [];
-
-        campaignList.slice(0, 3).forEach((campaign, idx) => {
-          if (Math.random() > 0.5) {
-            const amount = [5000, 10000, 25000][Math.floor(Math.random() * 3)];
-            totalAmount += amount;
-            uniqueCampaigns.add(campaign._id);
-            donationList.push({
-              _id: `donation_${idx}`,
-              campaignId: campaign._id,
-              campaignTitle: campaign.title,
-              amount,
-              date: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
-              status: 'confirmed',
-              campaignProgress: Math.round((campaign.raisedAmount / campaign.targetAmount) * 100)
-            });
-          }
-        });
-
-        setDonations(donationList.sort((a, b) => b.date - a.date));
+        const history = await api.getDonorHistory();
+        const donationList = history.history || [];
+        setDonations(donationList);
         setStats({
-          totalDonated: totalAmount,
-          campaignsSupported: uniqueCampaigns.size,
-          livesTouched: Math.floor(uniqueCampaigns.size * 2)
+          totalDonated: history.totalDonated || 0,
+          campaignsSupported: history.campaignsSupported || 0,
+          livesTouched: history.livesTouched || 0
         });
       } catch (error) {
         console.error('Failed to fetch donor data:', error);
@@ -143,17 +119,17 @@ export default function DonorDashboard({ user, onLogout }) {
                   <div key={donation._id} className="db-list-item">
                     <div style={{ flex: 1, paddingRight: '2rem' }}>
                       <div style={{ fontWeight: 700, fontSize: '1.125rem', marginBottom: '0.25rem' }}>
-                        {donation.campaignTitle}
+                        {donation.campaign || donation.campaignTitle}
                       </div>
                       <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
-                        {donation.date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} •{' '}
+                        {new Date(donation.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} •{' '}
                         <span style={{ color: 'var(--primary-vibrant)', fontWeight: 800, textTransform: 'uppercase', fontSize: '0.75rem' }}>{donation.status}</span>
                       </div>
 
                       <div style={{ width: '100%', height: '6px', background: 'var(--border)', borderRadius: '100px', overflow: 'hidden', marginBottom: '0.5rem' }}>
                         <div
                           style={{
-                            width: `${donation.campaignProgress}%`,
+                            width: `${donation.campaignProgress || 0}%`,
                             height: '100%',
                             background: 'var(--primary-vibrant)',
                             transition: 'width 1s ease'
@@ -161,7 +137,7 @@ export default function DonorDashboard({ user, onLogout }) {
                         />
                       </div>
                       <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)' }}>
-                        Campaign Progress: {donation.campaignProgress}%
+                        Campaign Progress: {donation.campaignProgress || 0}%
                       </div>
                     </div>
 
@@ -170,22 +146,22 @@ export default function DonorDashboard({ user, onLogout }) {
                         ₦{donation.amount.toLocaleString()}
                       </div>
                       <a
-                        href={api.getReceiptUrl(donation._id)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn-link"
-                        style={{
-                          fontSize: '0.75rem',
-                          color: 'var(--primary-vibrant)',
-                          fontWeight: 800,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em',
-                          textDecoration: 'none',
-                          borderBottom: '1.5px solid var(--primary-vibrant)'
-                        }}
-                      >
-                        Get Receipt
-                      </a>
+                          href={api.getReceiptUrl(donation._id)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-link"
+                          style={{
+                            fontSize: '0.75rem',
+                            color: 'var(--primary-vibrant)',
+                            fontWeight: 800,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em',
+                            textDecoration: 'none',
+                            borderBottom: '1.5px solid var(--primary-vibrant)'
+                          }}
+                        >
+                          Get Receipt
+                        </a>
                     </div>
                   </div>
                 ))}
